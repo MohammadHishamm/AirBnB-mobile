@@ -12,7 +12,12 @@
           "package_name": "com.example.airbnb"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "356192158933-qta0vj9gvfgqd94gm7d9rmov0mspgtft.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCGgQ3zjP46P_Bhb1y-WPzQpDvtLY_oPA0"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "356192158933-qta0vj9gvfgqd94gm7d9rmov0mspgtft.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
