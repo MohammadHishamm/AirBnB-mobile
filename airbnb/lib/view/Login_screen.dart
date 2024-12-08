@@ -79,13 +79,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(10),
                         color: Colors.pink,
                       ),
-                      child: const Center(
-                        child: Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      child: Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AppMainScreen(),
+                            ),
+                          ),
+                          child: const Text(
+                            "Continue",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              backgroundColor: Colors.transparent,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ),
