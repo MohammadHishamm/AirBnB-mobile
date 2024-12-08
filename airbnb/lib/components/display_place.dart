@@ -107,18 +107,18 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                       size: 34,
                                       color: Colors.white,
                                     ),
-                                    // InkWell(
-                                    //   onTap: () {
-                                    //     provider.toggleFavorite(place);
-                                    //   },
-                                    //   child: Icon(
-                                    //     Icons.favorite,
-                                    //     size: 30,
-                                    //     color: provider.isExist(place)
-                                    //         ? Colors.red
-                                    //         : Colors.black54,
-                                    //   ),
-                                    // ),
+                                    InkWell(
+                                        // onTap: () {
+                                        //   provider.toggleFavorite(place);
+                                        // },
+                                        // child: Icon(
+                                        //   Icons.favorite,
+                                        //   size: 30,
+                                        //   color: provider.isExist(place)
+                                        //       ? Colors.red
+                                        //       : Colors.black54,
+                                        // ),
+                                        ),
                                   ],
                                 ),
                               ],

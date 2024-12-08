@@ -1,5 +1,3 @@
-import 'package:airbnb/model/category.dart';
-import 'package:airbnb/model/place_model.dart';
 import 'package:airbnb/view/Login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +22,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: LoginScreen(),
     );
   }
