@@ -1,10 +1,10 @@
 name: airbnb
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
+  sdk: ">=3.4.3 <4.0.0"
 
 dependencies:
   flutter:
@@ -15,7 +15,10 @@ dependencies:
   firebase_auth: ^5.3.4
   google_sign_in: ^6.2.2
   another_carousel_pro: ^1.0.2
+  provider: ^6.1.2
   cached_network_image: ^3.4.1
+  custom_info_window: ^1.0.1
+  google_maps_flutter: ^2.10.0
 
 dev_dependencies:
   flutter_test:

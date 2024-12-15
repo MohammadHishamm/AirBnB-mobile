@@ -1,5 +1,6 @@
 import 'package:airbnb/Authentication/google_auth.dart';
 import 'package:airbnb/view/main_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -134,13 +135,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     InkWell(
                       onTap: () async {
+                        print('Attempting to sign in...');
                         await FirebaseAuthServices().signInWithGoogle();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AppMainScreen(),
-                          ),
-                        );
+
+                        User? currentUser = FirebaseAuth.instance.currentUser;
+                        if (currentUser != null) {
+                          print('User signed in: ${currentUser.email}');
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AppMainScreen(),
+                            ),
+                          );
+                        } else {
+                          print('User is not signed in.');
+                        }
                       },
                       child: socialIcons(
                         size,
