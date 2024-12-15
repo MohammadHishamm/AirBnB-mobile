@@ -1,7 +1,9 @@
+import 'package:airbnb/Provider/favorite_provider.dart';
+import 'package:airbnb/view/place_details_screen.dart';
+
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class DisplayPlace extends StatefulWidget {
   const DisplayPlace({super.key});
@@ -17,7 +19,7 @@ class _DisplayPlaceState extends State<DisplayPlace> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    // final provider = FavoriteProvider.of(context);
+    final provider = FavoriteProvider.of(context);
     return StreamBuilder(
       stream: placeCollection.snapshots(),
       builder: (context, streamSnapshot) {
@@ -34,7 +36,14 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                   horizontal: 20,
                 ),
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PlaceDetailScreen(place: place),
+                      ),
+                    );
+                  },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -46,21 +55,9 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                               height: 375,
                               width: double.infinity,
                               child: AnotherCarousel(
-                                images: place['imageUrls'].map((url) {
-                                  // Preload the image for faster loading later (optional)
-                                  precacheImage(NetworkImage(url), context);
-
-                                  return CachedNetworkImage(
-                                    imageUrl: url,
-                                    placeholder: (context, url) => Center(
-                                        child:
-                                            CircularProgressIndicator()), // Shows a loading spinner while the image loads
-                                    errorWidget: (context, url, error) => Icon(
-                                        Icons.error,
-                                        color: Colors
-                                            .red), // Shows an error icon if the image fails to load
-                                  );
-                                }).toList(),
+                                images: place['imageUrls']
+                                    .map((url) => NetworkImage(url))
+                                    .toList(),
                                 dotSize: 6,
                                 indicatorBgPadding: 5,
                                 dotBgColor: Colors.transparent,
@@ -108,23 +105,24 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                       color: Colors.white,
                                     ),
                                     InkWell(
-                                        // onTap: () {
-                                        //   provider.toggleFavorite(place);
-                                        // },
-                                        // child: Icon(
-                                        //   Icons.favorite,
-                                        //   size: 30,
-                                        //   color: provider.isExist(place)
-                                        //       ? Colors.red
-                                        //       : Colors.black54,
-                                        // ),
-                                        ),
+                                      onTap: () {
+                                        provider.toggleFavorite(place);
+                                      },
+                                      child: Icon(
+                                        Icons.favorite,
+                                        size: 30,
+                                        color: provider.isExist(place)
+                                            ? Colors.red
+                                            : Colors.black54,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
                             ),
                           ),
                           // for vendor profile
+                          //   vendorProfile(place),
                         ],
                       ),
                       SizedBox(
@@ -197,4 +195,30 @@ class _DisplayPlaceState extends State<DisplayPlace> {
       },
     );
   }
+
+  // Positioned vendorProfile(QueryDocumentSnapshot<Object?> place) {
+  //   return Positioned(
+  //     bottom: 11,
+  //     left: 10,
+  //     child: Stack(
+  //       children: [
+  //         const ClipRRect(
+  //           borderRadius: BorderRadius.only(
+  //             topRight: Radius.circular(15),
+  //             bottomRight: Radius.circular(15),
+  //           ),
+  //         ),
+  //         Positioned(
+  //           top: 10,
+  //           left: 10,
+  //           child: CircleAvatar(
+  //             backgroundImage: NetworkImage(
+  //               place['vendorProfile'],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
