@@ -1,6 +1,8 @@
 import 'package:airbnb/view/Login_screen.dart';
+import 'package:airbnb/view/detailed_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb/Authentication/google_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -52,19 +54,39 @@ class ProfilePage extends StatelessWidget {
                             "${FirebaseAuth.instance.currentUser!.displayName}\n",
                         style:
                             const TextStyle(fontSize: 20, color: Colors.black),
-                        children: const [
+                        children: [
                           TextSpan(
                             text: "Show profile",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               color: Colors.black54,
+                              decoration: TextDecoration
+                                  .underline, // Optional: Adds underline to indicate click
                             ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ShowProfileScreen()),
+                                );
+                              },
                           ),
                         ],
                       ),
                     ),
                     const Spacer(),
-                    const Icon(Icons.arrow_forward_ios)
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ShowProfileScreen()),
+                        );
+                      },
+                      child: const Icon(Icons.arrow_forward_ios),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -125,16 +147,9 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                profileInfo(Icons.person_2_outlined, "Personal information"),
-                profileInfo(Icons.security, "Login & security"),
-                profileInfo(Icons.payments_outlined, "Payments and payouts"),
+                profileInfo(Icons.payments_outlined, "Payments "),
                 profileInfo(Icons.settings_outlined, "Accessibility"),
-                profileInfo(Icons.note_outlined, "Taxes"),
-                profileInfo(Icons.person_2_outlined, "Personal information"),
-                profileInfo(Icons.translate, "Translation"),
                 profileInfo(Icons.notifications_outlined, "Notifications"),
-                profileInfo(Icons.lock_outline, "Privacy and sharing"),
-                profileInfo(Icons.card_travel, "Travel for work"),
                 const SizedBox(height: 15),
                 const Text(
                   "Hosting",
@@ -156,8 +171,6 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
                 profileInfo(Icons.help_outline, "Visit the Help Center"),
-                profileInfo(Icons.health_and_safety_outlined,
-                    "Get help with a safert issue"),
                 profileInfo(Icons.ac_unit, "How Airbnb works"),
                 profileInfo(Icons.edit_outlined, "Give us feedback"),
                 const SizedBox(height: 15),
