@@ -1,6 +1,7 @@
 import 'package:airbnb/Provider/favorite_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:airbnb/view/place_details_screen.dart';
 
 class Wishlists extends StatefulWidget {
   const Wishlists({super.key});
@@ -94,32 +95,45 @@ class _WishlistsState extends State<Wishlists> {
                                     );
                                   }
                                   var favoriteItem = snapShot.data!;
-                                  return Stack(
-                                    children: [
-                                      // image of favorite items
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          image: DecorationImage(
-                                            fit: BoxFit.cover,
-                                            image: NetworkImage(
-                                              favoriteItem['image'],
+                                  return GestureDetector(
+                                    onTap: () {
+                                      // Navigate to the detail screen and pass the favorite item data
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PlaceDetailScreen(
+                                            place:
+                                                favoriteItem, // Pass the favorite item
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        // image of favorite items
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            image: DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image: NetworkImage(
+                                                favoriteItem['image'],
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      // favorite icon in the top right corner
-                                      const Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: Icon(
-                                          Icons.favorite,
-                                          color: Colors.red,
+                                        // favorite icon in the top right corner
+                                        const Positioned(
+                                          top: 8,
+                                          right: 8,
+                                          child: Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                          ),
                                         ),
-                                      ),
-                                      // title of favorite items
-                                      Positioned(
+                                        // title of favorite items
+                                        Positioned(
                                           bottom: 8,
                                           left: 8,
                                           right: 8,
@@ -135,8 +149,10 @@ class _WishlistsState extends State<Wishlists> {
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                          ))
-                                    ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   );
                                 });
                           },
