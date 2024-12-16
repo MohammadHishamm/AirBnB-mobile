@@ -15,7 +15,7 @@ class DisplayPlace extends StatefulWidget {
 class _DisplayPlaceState extends State<DisplayPlace> {
   // collection for place items
   final CollectionReference placeCollection =
-      FirebaseFirestore.instance.collection("myAppCpollection");
+      FirebaseFirestore.instance.collection("myAppCollection");
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;

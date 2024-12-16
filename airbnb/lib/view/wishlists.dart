@@ -78,7 +78,7 @@ class _WishlistsState extends State<Wishlists> {
                             String favorite = favoriteItems[index];
                             return FutureBuilder(
                                 future: FirebaseFirestore.instance
-                                    .collection("myAppCpollection")
+                                    .collection("myAppCollection")
                                     .doc(favorite)
                                     .get(),
                                 builder: (context, snapShot) {

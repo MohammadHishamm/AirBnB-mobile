@@ -2,15 +2,15 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-Future<void> savePlacesToFirebase() async {
+Future<void> savePlaceToFirebase(Place place) async {
   final CollectionReference ref =
-      FirebaseFirestore.instance.collection("myAppCpollection");
-  for (final Place place in listOfPlace) {
-    final String id =
-        DateTime.now().toIso8601String() + Random().nextInt(1000).toString();
-    ref.doc("das");
-    await ref.doc(id).set(place.toMap());
-  }
+      FirebaseFirestore.instance.collection("myAppCollection");
+
+  final String id =
+      DateTime.now().toIso8601String() + Random().nextInt(1000).toString();
+
+  // Save the individual place object to Firebase
+  await ref.doc(id).set(place.toMap());
 }
 
 class Place {

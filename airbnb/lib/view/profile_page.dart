@@ -1,4 +1,5 @@
 import 'package:airbnb/view/Login_screen.dart';
+import 'package:airbnb/view/add_place_screen.dart';
 import 'package:airbnb/view/detailed_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb/Authentication/google_auth.dart';
@@ -159,7 +160,17 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 25),
-                profileInfo(Icons.add_home_outlined, "List your space"),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddPlaceScreen()),
+                    );
+                  },
+                  child:
+                      profileInfo(Icons.add_home_outlined, "List your space"),
+                ),
                 profileInfo(Icons.home_outlined, "Learn about hosting"),
                 const SizedBox(height: 15),
                 const Text(
