@@ -1,4 +1,7 @@
-import 'package:airbnb/components/display_place.dart';
+import 'package:airbnb/Components/display_place.dart';
+import 'package:airbnb/Components/display_total_price.dart';
+import 'package:airbnb/Components/map_with_custom_info_windows.dart';
+import 'package:airbnb/Components/search_bar_and_filter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +28,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Column(
           children: [
             // for search bar and filter button
-            //const SearchBarAndFilter(),
+            // const SearchBarAndFilter(),
             // let's fetch list of category items from firebase.
             listOfCategoryItems(size),
             const Expanded(
@@ -33,7 +36,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 child: Column(
                   children: [
                     // for switch button
-                    // DisplayTotalPrice(),
+                    //DisplayTotalPrice(),
                     SizedBox(height: 15),
                     // displat the place items
                     DisplayPlace(),
@@ -45,8 +48,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         ),
       ),
       // for google map
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      //floatingActionButton: const MapWithCustomInfoWindows(),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: const MapWithCustomInfoWindows(),
     );
   }
 
