@@ -37,4 +37,17 @@ class FirebaseAuthServices {
       print('Error: $e');
     }
   }
+
+  Future<void> signOut() async {
+    try {
+      print('Signing out...');
+      // Sign out from Firebase
+      await auth.signOut();
+      // Disconnect from GoogleSignIn
+      await googleSignIn.disconnect();
+      print('User successfully signed out.');
+    } catch (e) {
+      print('Error signing out: $e');
+    }
+  }
 }
