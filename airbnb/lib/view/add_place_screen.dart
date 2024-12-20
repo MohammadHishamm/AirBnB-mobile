@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:airbnb/model/place_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddPlaceScreen extends StatefulWidget {
   const AddPlaceScreen({super.key});
