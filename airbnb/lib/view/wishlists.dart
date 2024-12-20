@@ -25,9 +25,12 @@ class _WishlistsState extends State<Wishlists> {
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     final favoriteItems = provider.favorites;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context)
+          .scaffoldBackgroundColor, // Use theme for background color
       body: SafeArea(
         bottom: false,
         child: Padding(
@@ -48,19 +51,17 @@ class _WishlistsState extends State<Wishlists> {
                   ),
                 ),
                 const SizedBox(height: 35),
-                const Text(
+                Text(
                   "Wishlists",
-                  style: TextStyle(
-                    fontSize: 35,
+                  style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 5),
                 favoriteItems.isEmpty
-                    ? const Text(
+                    ? Text(
                         "No Favorites items yet",
-                        style: TextStyle(
-                          fontSize: 19,
+                        style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       )
@@ -143,7 +144,7 @@ class _WishlistsState extends State<Wishlists> {
                                             padding: const EdgeInsets.all(4),
                                             child: Text(
                                               favoriteItem['title'],
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
                                               ),

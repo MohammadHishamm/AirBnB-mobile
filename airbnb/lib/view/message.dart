@@ -16,7 +16,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -25,27 +25,27 @@ class _MessagesScreenState extends State<MessagesScreen> {
             children: [
               Row(
                 children: [
-                  const SizedBox(),
                   const Spacer(),
                   MyIconButton(
                     radius: 23,
                     icon: Icons.search,
-                    color: Colors.black12.withOpacity(0.03),
+                    color: Theme.of(context).cardColor,
                   ),
                   const SizedBox(width: 10),
                   MyIconButton(
                     radius: 23,
                     icon: Icons.tune,
-                    color: Colors.black12.withOpacity(0.03),
+                    color: Theme.of(context).cardColor,
                   ),
                 ],
               ),
               const SizedBox(height: 30),
-              const Text(
+              Text(
                 "MessagesScreen",
                 style: TextStyle(
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 10),
@@ -69,16 +69,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: selectedIndex == index
-                                ? Colors.black
-                                : Colors.black12.withOpacity(0.04),
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context)
+                                    .dividerColor
+                                    .withOpacity(0.1),
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
                             messagesScreenType[index],
                             style: TextStyle(
                               color: selectedIndex == index
-                                  ? Colors.white
-                                  : Colors.black,
+                                  ? Theme.of(context)
+                                      .primaryTextTheme
+                                      .labelLarge
+                                      ?.color
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color,
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                             ),
@@ -90,7 +98,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              ...messages.map((message) => _buildMessageItem(message)),
+              ...messages.map((message) => _buildMessageItem(message, context)),
             ],
           ),
         ),
@@ -98,8 +106,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  // Build message item UI
-  Widget _buildMessageItem(Message message) {
+  Widget _buildMessageItem(Message message, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
@@ -111,7 +118,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 height: 85,
                 width: 75,
                 decoration: BoxDecoration(
-                  color: Colors.black,
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
                     fit: BoxFit.cover,
@@ -124,7 +131,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 right: -18,
                 child: CircleAvatar(
                   backgroundImage: NetworkImage(message.vendorImage),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).cardColor,
                   radius: 25,
                 ),
               ),
@@ -140,16 +147,16 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   children: [
                     Text(
                       message.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
-                        color: Colors.black54,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     Text(
                       message.date,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
-                        color: Colors.black54,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
                   ],
@@ -158,20 +165,20 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   message.description,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     height: 1.1,
                     fontSize: 17,
-                    color: Colors.black54,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                 ),
                 Text(
                   message.duration,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     height: 1.4,
                     fontSize: 17,
-                    color: Colors.black54,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                 ),
               ],

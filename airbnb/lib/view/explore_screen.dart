@@ -1,5 +1,4 @@
 import 'package:airbnb/Components/display_place.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -16,27 +15,29 @@ class _ExploreScreenState extends State<ExploreScreen> {
       FirebaseFirestore.instance.collection("AppCategory");
 
   int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+
+    // Fetch current theme settings
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context)
+          .scaffoldBackgroundColor, // Dynamically set based on theme
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            // for search bar and filter button
-            // const SearchBarAndFilter(),
-            // let's fetch list of category items from firebase.
-            listOfCategoryItems(size),
+            // Let's fetch list of category items from Firebase
+            listOfCategoryItems(size, isDarkMode),
             const Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // for switch button
-                    //DisplayTotalPrice(),
                     SizedBox(height: 15),
-                    // displat the place items
+                    // Display the place items
                     DisplayPlace(),
                   ],
                 ),
@@ -45,13 +46,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
           ],
         ),
       ),
-      // for google map
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: const MapWithCustomInfoWindows(),
+      // Optional: Floating action button or other features can be added here
     );
   }
 
-  StreamBuilder<QuerySnapshot<Object?>> listOfCategoryItems(Size size) {
+  // Function to build a list of categories from Firebase
+  StreamBuilder<QuerySnapshot<Object?>> listOfCategoryItems(
+      Size size, bool isDarkMode) {
     return StreamBuilder(
       stream: categoryCollection.snapshots(),
       builder: (context, streamSnapshot) {
@@ -74,6 +75,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   itemCount: streamSnapshot.data!.docs.length,
                   physics: const BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
+                    final isSelected = selectedIndex == index;
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -88,20 +90,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
+                          color: isDarkMode
+                              ? Colors.black45
+                              : Colors.white, // Background color based on theme
                         ),
                         child: Column(
                           children: [
                             Container(
-                              height: 32,
-                              width: 40,
+                              height:
+                                  48, // Increased icon size for consistent layout
+                              width:
+                                  48, // Icon size remains large for consistency
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                               ),
                               child: Image.network(
                                 streamSnapshot.data!.docs[index]['image'],
-                                color: selectedIndex == index
-                                    ? Colors.black
-                                    : Colors.black45,
+                                color: isSelected
+                                    ? (isDarkMode ? Colors.white : Colors.black)
+                                    : (isDarkMode
+                                        ? Colors.white70
+                                        : Colors
+                                            .black45), // Icon color based on selection
                               ),
                             ),
                             const SizedBox(height: 5),
@@ -109,19 +119,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               streamSnapshot.data!.docs[index]['title'],
                               style: TextStyle(
                                 fontSize: 13,
-                                color: selectedIndex == index
-                                    ? Colors.black
-                                    : Colors.black45,
+                                color: isSelected
+                                    ? (isDarkMode
+                                        ? Colors.white
+                                        : Colors
+                                            .black) // Text color when selected
+                                    : (isDarkMode
+                                        ? Colors.white70
+                                        : Colors
+                                            .black45), // Text color when not selected
                               ),
                             ),
                             const SizedBox(height: 10),
                             Container(
                               height: 3,
                               width: 50,
-                              color: selectedIndex == index
-                                  ? Colors.black
-                                  : Colors.transparent,
-                            )
+                              color: isSelected
+                                  ? (isDarkMode ? Colors.white : Colors.black)
+                                  : Colors
+                                      .transparent, // Underline color when selected
+                            ),
                           ],
                         ),
                       ),
