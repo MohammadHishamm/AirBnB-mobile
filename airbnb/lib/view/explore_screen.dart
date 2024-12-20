@@ -1,7 +1,5 @@
 import 'package:airbnb/Components/display_place.dart';
-import 'package:airbnb/Components/display_total_price.dart';
-import 'package:airbnb/Components/map_with_custom_info_windows.dart';
-import 'package:airbnb/Components/search_bar_and_filter.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
