@@ -32,17 +32,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final TextEditingController _longitudeController = TextEditingController();
 
   bool _isActive = true;
-  List<String> _imageUrls = [];
 
   // Form submit function
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      // Process image URLs
+      final imageUrls =
+          _imageController.text.split(',').map((url) => url.trim()).toList();
+
       final place = Place(
         title: _titleController.text,
         isActive: _isActive,
-        image: _imageController.text,
+        image: imageUrls.isNotEmpty ? imageUrls.first : "",
         rating: double.parse(_ratingController.text),
         date: _dateController.text,
         price: int.parse(_priceController.text),
@@ -55,7 +58,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         yearOfHostin: int.parse(_yearOfHostingController.text),
         latitude: double.parse(_latitudeController.text),
         longitude: double.parse(_longitudeController.text),
-        imageUrls: _imageUrls,
+        imageUrls: imageUrls,
       );
 
       // Call savePlaceToFirebase to save the place
@@ -92,7 +95,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     _isActive = value;
                   });
                 }),
-                _buildTextField(_imageController, "Image URL"),
+                _buildTextField(
+                    _imageController, "Image URLs (comma-separated)"),
                 _buildTextField(_ratingController, "Rating", isNumeric: true),
                 _buildTextField(_dateController, "Date"),
                 _buildTextField(_priceController, "Price", isNumeric: true),
