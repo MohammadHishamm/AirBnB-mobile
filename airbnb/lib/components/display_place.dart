@@ -6,8 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class DisplayPlace extends StatefulWidget {
-  const DisplayPlace({super.key});
+  final String displayCategory; // Add this field to store the selected category
 
+  const DisplayPlace({super.key, required this.displayCategory});
   @override
   State<DisplayPlace> createState() => _DisplayPlaceState();
 }
@@ -26,7 +27,11 @@ class _DisplayPlaceState extends State<DisplayPlace> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return StreamBuilder(
-      stream: placeCollection.snapshots(),
+      stream: widget.displayCategory.isEmpty
+          ? placeCollection.snapshots() // If no category selected, fetch all places
+          : placeCollection
+              .where("category", isEqualTo: widget.displayCategory) // Filter by category if selected
+              .snapshots(),
       builder: (context, streamSnapshot) {
         if (streamSnapshot.hasData) {
           return ListView.builder(
