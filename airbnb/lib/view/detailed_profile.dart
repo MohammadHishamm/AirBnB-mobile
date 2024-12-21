@@ -10,17 +10,31 @@ class ShowProfileScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor:
+          Theme.of(context).scaffoldBackgroundColor, // Dynamic background color
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context)
+            .appBarTheme
+            .backgroundColor, // Dynamic AppBar color
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context)
+                .iconTheme
+                .color, // Dynamically fetch icon color based on theme
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Profile Details',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Theme.of(context)
+                .appBarTheme
+                .titleTextStyle
+                ?.color, // Dynamic title color
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -34,7 +48,8 @@ class ShowProfileScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: Colors.grey.shade300,
+                    backgroundColor: Theme.of(context)
+                        .cardColor, // Dynamic background color for the avatar
                     backgroundImage: NetworkImage(
                       user?.photoURL ?? 'https://via.placeholder.com/150',
                     ),
@@ -42,37 +57,48 @@ class ShowProfileScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     user?.displayName ?? "User Name",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.color, // Dynamic color
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     user?.email ?? "No email provided",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.color, // Dynamic color
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 30),
-            const Text(
+            Text(
               "Personal Information",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                color: Colors.black87,
+                color: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.color, // Dynamic color
               ),
             ),
             const SizedBox(height: 15),
-            profileDetailTile(Icons.person, "Name", user?.displayName ?? "N/A"),
-            profileDetailTile(Icons.email, "Email", user?.email ?? "N/A"),
             profileDetailTile(
-                Icons.phone, "Phone", user?.phoneNumber ?? "Not set"),
+                Icons.person, "Name", user?.displayName ?? "N/A", context),
+            profileDetailTile(
+                Icons.email, "Email", user?.email ?? "N/A", context),
+            profileDetailTile(
+                Icons.phone, "Phone", user?.phoneNumber ?? "Not set", context),
           ],
         ),
       ),
@@ -80,7 +106,8 @@ class ShowProfileScreen extends StatelessWidget {
   }
 
   // Helper function to create styled tiles for profile information
-  Widget profileDetailTile(IconData icon, String title, String value) {
+  Widget profileDetailTile(
+      IconData icon, String title, String value, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
@@ -88,7 +115,9 @@ class ShowProfileScreen extends StatelessWidget {
           Icon(
             icon,
             size: 30,
-            color: Colors.black54,
+            color: Theme.of(context)
+                .iconTheme
+                .color, // Dynamic color based on theme
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -97,18 +126,24 @@ class ShowProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black54,
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.color, // Dynamic color
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.color, // Dynamic color
                   ),
                 ),
               ],

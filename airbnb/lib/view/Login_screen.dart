@@ -15,58 +15,64 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    final bool isDarkMode =
+        Theme.of(context).brightness == Brightness.dark; // Detecting the theme
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor:
+          isDarkMode ? Colors.black : Colors.white, // Dynamic background color
       body: SingleChildScrollView(
         child: SafeArea(
           bottom: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Center(
+              Center(
                 child: Text(
                   "Log in or sign up",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: isDarkMode
+                        ? Colors.white
+                        : Colors.black, // Dynamic text color
                   ),
                 ),
               ),
-              const Divider(
-                color: Colors.black12,
-              ),
+              const Divider(color: Colors.black12),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Welcome to Airbnb",
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
+                        color: isDarkMode
+                            ? Colors.white
+                            : Colors.black, // Dynamic text color
                       ),
                     ),
-                    SizedBox(
-                      height: size.height * 0.02,
-                    ),
-                    // for phone number field,
-                    phoneNumberField(size),
+                    SizedBox(height: size.height * 0.02),
+                    // Phone number field
+                    phoneNumberField(size, isDarkMode),
                     const SizedBox(height: 10),
                     RichText(
-                      text: const TextSpan(
+                      text: TextSpan(
                         text:
-                            "We'll call or text you to conform your number. Standart message and data rates apply.  ",
+                            "We'll call or text you to confirm your number. Standard message and data rates apply. ",
                         style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black,
-                        ),
+                            fontSize: 15,
+                            color: isDarkMode ? Colors.white70 : Colors.black),
                         children: [
                           TextSpan(
                             text: "Privacy Policy",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               decoration: TextDecoration.underline,
+                              color: isDarkMode ? Colors.white : Colors.blue,
                             ),
                           ),
                         ],
@@ -88,13 +94,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (context) => const AppMainScreen(),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Continue",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               backgroundColor: Colors.transparent,
-                              color: Colors.black,
+                              color: isDarkMode
+                                  ? Colors.black
+                                  : Colors.white, // Dynamic text color
                             ),
                           ),
                         ),
@@ -104,24 +112,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.black26,
-                          ),
-                        ),
+                            child: Divider(
+                                color: isDarkMode
+                                    ? Colors.white30
+                                    : Colors.black26)),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                            "or",
-                            style: TextStyle(fontSize: 18),
-                          ),
+                          child: Text("or", style: TextStyle(fontSize: 18)),
                         ),
                         Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.black26,
-                          ),
-                        ),
+                            child: Divider(
+                                color: isDarkMode
+                                    ? Colors.white30
+                                    : Colors.black26)),
                       ],
                     ),
                     SizedBox(height: size.height * 0.015),
@@ -131,8 +134,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Continue with Facebook",
                       Colors.blue,
                       30,
+                      isDarkMode,
                     ),
-
                     InkWell(
                       onTap: () async {
                         print('Attempting to sign in...');
@@ -157,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         "Continue with Google",
                         Colors.pink,
                         27,
+                        isDarkMode,
                       ),
                     ),
                     socialIcons(
@@ -165,6 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Continue with Apple",
                       Colors.black,
                       30,
+                      isDarkMode,
                     ),
                     socialIcons(
                       size,
@@ -172,14 +177,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Continue with email",
                       Colors.black,
                       30,
+                      isDarkMode,
                     ),
                     const SizedBox(height: 10),
-                    const Center(
+                    Center(
                       child: Text(
                         "Need help?",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 17,
+                          color: isDarkMode
+                              ? Colors.white
+                              : Colors.black, // Dynamic text color
                         ),
                       ),
                     )
@@ -193,7 +202,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Padding socialIcons(Size size, icon, name, color, double iconSize) {
+  Padding socialIcons(
+      Size size, icon, name, color, double iconSize, bool isDarkMode) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Container(
@@ -201,22 +211,25 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.symmetric(vertical: 11),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(),
+          border: Border.all(
+            color: isDarkMode
+                ? Colors.white30
+                : Colors.black26, // Dynamic border color
+          ),
         ),
         child: Row(
           children: [
             SizedBox(width: size.width * 0.05),
-            Icon(
-              icon,
-              color: color,
-              size: iconSize,
-            ),
+            Icon(icon, color: color, size: iconSize),
             SizedBox(width: size.width * 0.18),
             Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
+                color: isDarkMode
+                    ? Colors.white
+                    : Colors.black, // Dynamic text color
               ),
             ),
             const SizedBox(width: 10),
@@ -226,52 +239,24 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Container phoneNumberField(Size size) {
+  Container phoneNumberField(Size size, bool isDarkMode) {
     return Container(
       width: size.width,
       height: 130,
       decoration: BoxDecoration(
         border: Border.all(
-          color: Colors.black45,
-        ),
+            color: isDarkMode
+                ? Colors.white30
+                : Colors.black45), // Dynamic border color
         borderRadius: BorderRadius.circular(10),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(
-              right: 10,
-              left: 10,
-              top: 8,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Country/Regin",
-                  style: TextStyle(
-                    color: Colors.black45,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Nepal(+977)",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                      ),
-                    ),
-                    Icon(
-                      Icons.keyboard_arrow_down_sharp,
-                      size: 30,
-                    ),
-                  ],
-                )
-              ],
-            ),
+            padding: EdgeInsets.only(right: 10, left: 10, top: 8),
+            child:
+                Text("Country/Region", style: TextStyle(color: Colors.black45)),
           ),
           Divider(),
           Padding(
@@ -279,10 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: "Phone number",
-                hintStyle: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black45,
-                ),
+                hintStyle: TextStyle(fontSize: 18, color: Colors.black45),
                 border: InputBorder.none,
               ),
             ),

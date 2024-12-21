@@ -3,11 +3,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthServices {
   final auth = FirebaseAuth.instance;
+  final googleSignIn = GoogleSignIn(); // No clientId needed for emulator/mobile
 
-  final googleSignIn = GoogleSignIn(
-    clientId:
-        '356192158933-qta0vj9gvfgqd94gm7d9rmov0mspgtft.apps.googleusercontent.com', // Explicitly set the client ID for web
-  );
   Future<void> signInWithGoogle() async {
     try {
       print('Starting Google sign-in...');
@@ -15,13 +12,13 @@ class FirebaseAuthServices {
           await googleSignIn.signIn();
       if (googleSignInAccount != null) {
         print('Google account selected: ${googleSignInAccount.email}');
-        final GoogleSignInAuthentication googleSignInAuthentication =
+        final GoogleSignInAuthentication googleAuth =
             await googleSignInAccount.authentication;
 
         print('Google authentication successful');
         final AuthCredential authCredential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
         );
 
         print('Credentials obtained. Signing in to Firebase...');
@@ -34,16 +31,14 @@ class FirebaseAuthServices {
     } on FirebaseAuthException catch (e) {
       print('FirebaseAuthException: ${e.message}');
     } catch (e) {
-      print('Error: $e');
+      print('Error during Google Sign-In: $e');
     }
   }
 
   Future<void> signOut() async {
     try {
       print('Signing out...');
-      // Sign out from Firebase
       await auth.signOut();
-      // Disconnect from GoogleSignIn
       await googleSignIn.disconnect();
       print('User successfully signed out.');
     } catch (e) {

@@ -1,7 +1,7 @@
 import 'package:airbnb/Provider/favorite_provider.dart';
 import 'package:airbnb/view/place_details_screen.dart';
-
 import 'package:another_carousel_pro/another_carousel_pro.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -16,10 +16,15 @@ class _DisplayPlaceState extends State<DisplayPlace> {
   // collection for place items
   final CollectionReference placeCollection =
       FirebaseFirestore.instance.collection("myAppCollection");
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     final provider = FavoriteProvider.of(context);
+
+    // Fetch current theme settings to adjust colors
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return StreamBuilder(
       stream: placeCollection.snapshots(),
       builder: (context, streamSnapshot) {
@@ -32,9 +37,7 @@ class _DisplayPlaceState extends State<DisplayPlace> {
             itemBuilder: (context, index) {
               final place = streamSnapshot.data!.docs[index];
               return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -55,9 +58,25 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                               height: 375,
                               width: double.infinity,
                               child: AnotherCarousel(
-                                images: place['imageUrls']
-                                    .map((url) => NetworkImage(url))
-                                    .toList(),
+                                images: place['imageUrls'].map((url) {
+                                  return CachedNetworkImage(
+                                    imageUrl: url,
+                                    placeholder: (context, url) =>
+                                        Transform.scale(
+                                      scale: 0.3, // Scale the loading indicator
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 1,
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) {
+                                      print(
+                                          'Failed to load image: $url, error: $error');
+                                      return const Icon(Icons
+                                          .error); // Placeholder error icon
+                                    },
+                                    fit: BoxFit.cover,
+                                  );
+                                }).toList(),
                                 dotSize: 6,
                                 indicatorBgPadding: 5,
                                 dotBgColor: Colors.transparent,
@@ -73,15 +92,15 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                 place['isActive'] == true
                                     ? Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: isDarkMode
+                                              ? Colors.black54
+                                              : Colors.white,
                                           borderRadius:
                                               BorderRadius.circular(40),
                                         ),
                                         child: const Padding(
                                           padding: EdgeInsets.symmetric(
-                                            horizontal: 15,
-                                            vertical: 5,
-                                          ),
+                                              horizontal: 15, vertical: 5),
                                           child: Text(
                                             "GuestFavorite",
                                             style: TextStyle(
@@ -90,15 +109,11 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                           ),
                                         ),
                                       )
-                                    : SizedBox(
-                                        width: size.width * 0.03,
-                                      ),
+                                    : SizedBox(width: size.width * 0.03),
                                 const Spacer(),
-                                // for favorite button
                                 Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    // white border
                                     const Icon(
                                       Icons.favorite_outline_rounded,
                                       size: 34,
@@ -113,7 +128,10 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                         size: 30,
                                         color: provider.isExist(place)
                                             ? Colors.red
-                                            : Colors.black54,
+                                            : isDarkMode
+                                                ? Colors.white70
+                                                : Colors
+                                                    .black54, // Dynamic favorite icon color
                                       ),
                                     ),
                                   ],
@@ -121,52 +139,66 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                               ],
                             ),
                           ),
-                          // for vendor profile
-                          //   vendorProfile(place),
                         ],
                       ),
-                      SizedBox(
-                        height: size.height * 0.01,
-                      ),
+                      SizedBox(height: size.height * 0.01),
                       Row(
                         children: [
                           Text(
                             place['address'],
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Colors.black, // Dynamic text color
                             ),
                           ),
                           const Spacer(),
-                          const Icon(Icons.star),
+                          Icon(
+                            Icons.star,
+                            color: isDarkMode
+                                ? Colors.yellowAccent
+                                : Colors.amber, // Dynamic star color
+                          ),
                           const SizedBox(width: 5),
                           Text(
                             place['rating'].toString(),
+                            style: TextStyle(
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Colors.black, // Dynamic text color
+                            ),
                           ),
                         ],
                       ),
                       Text(
                         "Stay with ${place['vendor']} . ${place['vendorProfession']}",
-                        style: const TextStyle(
-                          color: Colors.black54,
+                        style: TextStyle(
+                          color: isDarkMode
+                              ? Colors.white70
+                              : Colors.black54, // Dynamic text color
                           fontSize: 16.5,
                         ),
                       ),
                       Text(
                         place['date'],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16.5,
-                          color: Colors.black54,
+                          color: isDarkMode
+                              ? Colors.white70
+                              : Colors.black54, // Dynamic text color
                         ),
                       ),
                       SizedBox(height: size.height * 0.007),
                       RichText(
                         text: TextSpan(
                           text: "\$${place['price']}",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: isDarkMode
+                                ? Colors.white
+                                : Colors.black, // Dynamic price color
                             fontSize: 16,
                           ),
                           children: const [

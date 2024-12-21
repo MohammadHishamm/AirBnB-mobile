@@ -1,4 +1,5 @@
 import 'package:airbnb/view/Login_screen.dart';
+import 'package:airbnb/view/accessibility_screen.dart';
 import 'package:airbnb/view/add_place_screen.dart';
 import 'package:airbnb/view/detailed_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,8 +13,10 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -23,7 +26,7 @@ class ProfilePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 15),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
@@ -31,12 +34,14 @@ class ProfilePage extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 30,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     Icon(
                       Icons.notifications_outlined,
                       size: 35,
-                    )
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 25),
@@ -53,16 +58,18 @@ class ProfilePage extends StatelessWidget {
                       TextSpan(
                         text:
                             "${FirebaseAuth.instance.currentUser!.displayName}\n",
-                        style:
-                            const TextStyle(fontSize: 20, color: Colors.black),
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                         children: [
                           TextSpan(
                             text: "Show profile",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black54,
-                              decoration: TextDecoration
-                                  .underline, // Optional: Adds underline to indicate click
+                              color:
+                                  Theme.of(context).textTheme.bodyMedium?.color,
+                              decoration: TextDecoration.underline,
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
@@ -86,31 +93,33 @@ class ProfilePage extends StatelessWidget {
                               builder: (context) => const ShowProfileScreen()),
                         );
                       },
-                      child: const Icon(Icons.arrow_forward_ios),
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                const Divider(color: Colors.black12),
+                Divider(color: Theme.of(context).dividerColor),
                 const SizedBox(height: 10),
                 Card(
                   elevation: 4,
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 25,
-                    ),
+                    padding: const EdgeInsets.only(left: 25),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text.rich(
+                        Text.rich(
                           TextSpan(
                             text: "Airbnb your place\n",
                             style: TextStyle(
                               height: 2.5,
                               fontSize: 18,
-                              color: Colors.black,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge?.color,
                               fontWeight: FontWeight.bold,
                             ),
                             children: [
@@ -120,7 +129,10 @@ class ProfilePage extends StatelessWidget {
                                 style: TextStyle(
                                   height: 1.2,
                                   fontSize: 14,
-                                  color: Colors.black,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -138,25 +150,38 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Divider(color: Colors.black12),
+                Divider(color: Theme.of(context).dividerColor),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   "Settings",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 20),
-                profileInfo(Icons.payments_outlined, "Payments "),
-                profileInfo(Icons.settings_outlined, "Accessibility"),
-                profileInfo(Icons.notifications_outlined, "Notifications"),
+                profileInfo(context, Icons.payments_outlined, "Payments"),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AccessibilityScreen()),
+                    );
+                  },
+                  child: profileInfo(
+                      context, Icons.settings_outlined, "Accessibility"),
+                ),
+                profileInfo(
+                    context, Icons.notifications_outlined, "Notifications"),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   "Hosting",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 25),
@@ -168,41 +193,46 @@ class ProfilePage extends StatelessWidget {
                           builder: (context) => const AddPlaceScreen()),
                     );
                   },
-                  child:
-                      profileInfo(Icons.add_home_outlined, "List your space"),
+                  child: profileInfo(
+                      context, Icons.add_home_outlined, "List your space"),
                 ),
-                profileInfo(Icons.home_outlined, "Learn about hosting"),
+                profileInfo(
+                    context, Icons.home_outlined, "Learn about hosting"),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   "Support",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 25),
-                profileInfo(Icons.help_outline, "Visit the Help Center"),
-                profileInfo(Icons.ac_unit, "How Airbnb works"),
-                profileInfo(Icons.edit_outlined, "Give us feedback"),
+                profileInfo(
+                    context, Icons.help_outline, "Visit the Help Center"),
+                profileInfo(context, Icons.ac_unit, "How Airbnb works"),
+                profileInfo(context, Icons.edit_outlined, "Give us feedback"),
                 const SizedBox(height: 15),
-                const Text(
+                Text(
                   "Legal",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 25),
-                profileInfo(Icons.menu_book_outlined, "Terms of Service"),
-                profileInfo(Icons.menu_book_outlined, "Privacy Policy"),
-                profileInfo(Icons.menu_book_outlined, "Open source licenses"),
+                profileInfo(
+                    context, Icons.menu_book_outlined, "Terms of Service"),
+                profileInfo(
+                    context, Icons.menu_book_outlined, "Privacy Policy"),
+                profileInfo(
+                    context, Icons.menu_book_outlined, "Open source licenses"),
                 const SizedBox(height: 10),
                 TextButton(
                   onPressed: () async {
                     try {
                       await FirebaseAuthServices().signOut();
-                      print('Logout successful');
-                      // Navigate to the LoginScreen directly
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -212,25 +242,27 @@ class ProfilePage extends StatelessWidget {
                       print('Error during logout: $e');
                     }
                   },
-                  child: const Text(
+                  child: Text(
                     "Log out",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
-                      decorationColor: Colors.black,
+                      decorationColor:
+                          Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Divider(
-                  color: Colors.black12,
-                ),
+                Divider(color: Theme.of(context).dividerColor),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   "Version 24.34 (28004615)",
-                  style: TextStyle(fontSize: 10),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
                 ),
                 const SizedBox(height: 50),
               ],
@@ -241,7 +273,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Padding profileInfo(icon, name) {
+  Padding profileInfo(BuildContext context, IconData icon, String name) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -251,21 +283,25 @@ class ProfilePage extends StatelessWidget {
               Icon(
                 icon,
                 size: 35,
-                color: Colors.black.withOpacity(0.7),
+                color: Theme.of(context).iconTheme.color,
               ),
               const SizedBox(width: 20),
               Text(
                 name,
-                style: const TextStyle(fontSize: 17),
+                style: TextStyle(
+                  fontSize: 17,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
               const Spacer(),
-              const Icon(Icons.arrow_forward_ios)
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Theme.of(context).iconTheme.color,
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(
-            color: Colors.black12,
-          ),
+          Divider(color: Theme.of(context).dividerColor),
         ],
       ),
     );

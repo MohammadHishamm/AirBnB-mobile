@@ -32,17 +32,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final TextEditingController _longitudeController = TextEditingController();
 
   bool _isActive = true;
-  List<String> _imageUrls = [];
 
   // Form submit function
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      // Process image URLs
+      final imageUrls =
+          _imageController.text.split(',').map((url) => url.trim()).toList();
+
       final place = Place(
         title: _titleController.text,
         isActive: _isActive,
-        image: _imageController.text,
+        image: imageUrls.isNotEmpty ? imageUrls.first : "",
         rating: double.parse(_ratingController.text),
         date: _dateController.text,
         price: int.parse(_priceController.text),
@@ -55,7 +58,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         yearOfHostin: int.parse(_yearOfHostingController.text),
         latitude: double.parse(_latitudeController.text),
         longitude: double.parse(_longitudeController.text),
-        imageUrls: _imageUrls,
+        imageUrls: imageUrls,
       );
 
       // Call savePlaceToFirebase to save the place
@@ -70,14 +73,15 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Your Place'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         elevation: 0,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -86,41 +90,50 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTextField(_titleController, "Title"),
+                _buildTextField(_titleController, "Title", theme),
                 _buildSwitchField("Is Active", _isActive, (value) {
                   setState(() {
                     _isActive = value;
                   });
-                }),
-                _buildTextField(_imageController, "Image URL"),
-                _buildTextField(_ratingController, "Rating", isNumeric: true),
-                _buildTextField(_dateController, "Date"),
-                _buildTextField(_priceController, "Price", isNumeric: true),
-                _buildTextField(_addressController, "Address"),
-                _buildTextField(_vendorController, "Vendor"),
+                }, theme),
                 _buildTextField(
-                    _vendorProfessionController, "Vendor Profession"),
-                _buildTextField(_vendorProfileController, "Vendor Profile URL"),
-                _buildTextField(_reviewController, "Review", isNumeric: true),
+                    _imageController, "Image URLs (comma-separated)", theme),
+                _buildTextField(_ratingController, "Rating", theme,
+                    isNumeric: true),
+                _buildTextField(_dateController, "Date", theme),
+                _buildTextField(_priceController, "Price", theme,
+                    isNumeric: true),
+                _buildTextField(_addressController, "Address", theme),
+                _buildTextField(_vendorController, "Vendor", theme),
                 _buildTextField(
-                    _bedAndBathroomController, "Bed and Bathroom Details"),
-                _buildTextField(_yearOfHostingController, "Year of Hosting",
+                    _vendorProfessionController, "Vendor Profession", theme),
+                _buildTextField(
+                    _vendorProfileController, "Vendor Profile URL", theme),
+                _buildTextField(_reviewController, "Review", theme,
                     isNumeric: true),
-                _buildTextField(_latitudeController, "Latitude",
+                _buildTextField(_bedAndBathroomController,
+                    "Bed and Bathroom Details", theme),
+                _buildTextField(
+                    _yearOfHostingController, "Year of Hosting", theme,
                     isNumeric: true),
-                _buildTextField(_longitudeController, "Longitude",
+                _buildTextField(_latitudeController, "Latitude", theme,
+                    isNumeric: true),
+                _buildTextField(_longitudeController, "Longitude", theme,
                     isNumeric: true),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: theme.primaryColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 12),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Submit",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: theme.primaryTextTheme.labelLarge?.color,
+                    ),
                   ),
                 ),
               ],
@@ -132,7 +145,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   // Reusable text field widget
-  Widget _buildTextField(TextEditingController controller, String label,
+  Widget _buildTextField(
+      TextEditingController controller, String label, ThemeData theme,
       {bool isNumeric = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -141,6 +155,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
@@ -156,13 +171,16 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   // Reusable switch widget
-  Widget _buildSwitchField(
-      String label, bool value, void Function(bool) onChanged) {
+  Widget _buildSwitchField(String label, bool value,
+      void Function(bool) onChanged, ThemeData theme) {
     return SwitchListTile(
-      title: Text(label),
+      title: Text(
+        label,
+        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+      ),
       value: value,
       onChanged: onChanged,
-      activeColor: Colors.black,
+      activeColor: theme.primaryColor,
     );
   }
 }
