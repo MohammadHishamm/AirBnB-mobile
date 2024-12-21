@@ -1,66 +1,100 @@
-// ignore_for_file: prefer_const_constructors, sort_child_properties_last
-
-import 'package:airbnb/components/my_icon_button.dart';
 import 'package:flutter/material.dart';
-import '../model/message_model.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key, required this.title});
   final String title;
-
   @override
-  State<MessagesScreen> createState() => _MessagesScreenState();
+  State<MessagesScreen> createState() => _MyMessagesScreen();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> {
-  late OpenAI openAI;
+class _MyMessagesScreen extends State<MessagesScreen> {
   TextEditingController controller = TextEditingController();
   String results = "results to be shown here";
-  List<ChatMessage> messages =
-<ChatMessage>[
-];
-ChatUser openAIuser =
-ChatUser(
-id: '2',
-firstName: 'ChatGPT',
-lastName: 'AI',
-);
+  late OpenAI openAI;
+
+  List<ChatMessage> messages = <ChatMessage>[];
+  ChatUser userMe = ChatUser(
+    id: '1',
+    firstName: 'Taraggy',
+    lastName: 'Ghanim',
+  );
+  ChatUser openAIuser = ChatUser(
+    id: '2',
+    firstName: 'ChatGPT',
+    lastName: 'AI',
+  );
+
   @override
   void initState() {
     super.initState();
     openAI = OpenAI.instance.build(
-        token:
-           "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",
-        baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
+        token: "",
+        baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 25)),
         enableLog: true);
   }
 
   void chatComplete() async {
-    final request = ChatCompleteText(
-        messages: [
-          Map.of({"role": "user", "content": controller.text})
-        ],
-        maxToken: 200,
-        model:
-            GptTurbo0301ChatModel()); //Gpt41106PreviewChatModel());//GptTurbo0301ChatModel());
-    final response = await openAI.onChatCompletion(request: request);
-    for (var element in response!.choices) {
-      print("data -> ${element.message?.content}");
-      results = element.message!.content;
-      ChatMessage msg = ChatMessage(
-          user: openAIuser,
-          createdAt: DateTime.now(),
-          text: element.message!.content);
-      messages.insert(0, msg);
-      setState(() {
-        messages;
-      });
-      setState(() {
-        results;
-      });
+    if (controller.text.trim().isEmpty) {
+      print("Input is empty. Please type a message.");
+      return;
     }
+
+    try {
+      final request = ChatCompleteText(
+        messages: [
+          {"role": "user", "content": controller.text}
+        ],
+        maxToken: 100, // Reduce token limit for lower usage
+        model: GptTurbo0631Model(), // Specify GPT-3.5-Turbo
+      );
+
+      controller.text = "";
+
+      final response = await openAI.onChatCompletion(request: request);
+
+      if (response == null || response.choices.isEmpty) {
+        print("No response from the API.");
+        return;
+      }
+
+      for (var element in response.choices) {
+        final content = element.message?.content;
+        if (content != null) {
+          print("data -> $content");
+
+          results = content;
+          ChatMessage msg = ChatMessage(
+            user: openAIuser,
+            createdAt: DateTime.now(),
+            text: content,
+          );
+
+          setState(() {
+            messages.insert(0, msg);
+          });
+        }
+      }
+    } catch (e) {
+      if (e.toString().contains('insufficient_quota')) {
+        print("You have exceeded your free quota. Please wait for the reset.");
+      } else {
+        print("Error during chat completion: $e");
+      }
+    }
+  }
+
+  Future<void> _generateImage() async {
+    var prompt = controller.text;
+    final request = GenerateImage(
+        model: DallE2(),
+        prompt,
+        1,
+        size: ImageSize.size256,
+        responseFormat: Format.url);
+    GenImgResponse? response = await openAI.generateImage(request);
+    print("img url :${response?.data?.last?.url}");
   }
 
   @override
@@ -74,7 +108,13 @@ lastName: 'AI',
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Expanded(child: Text(results)),
+            Expanded(
+                child: DashChat(
+              messages: messages,
+              currentUser: userMe,
+              onSend: (m) {},
+              readOnly: true,
+            )),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(children: [
@@ -93,6 +133,14 @@ lastName: 'AI',
                 )),
                 ElevatedButton(
                   onPressed: () {
+                    ChatMessage msg = ChatMessage(
+                        user: userMe,
+                        createdAt: DateTime.now(),
+                        text: controller.text);
+                    messages.add(msg); // note the add function effect
+                    setState(() {
+                      messages;
+                    });
                     chatComplete();
                   },
                   child: Icon(
