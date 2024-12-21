@@ -15,6 +15,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       FirebaseFirestore.instance.collection("AppCategory");
 
   int selectedIndex = 0;
+  String selectedCategory = ''; // Default to empty string (fetch all places)
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +33,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
           children: [
             // Let's fetch list of category items from Firebase
             listOfCategoryItems(size, isDarkMode),
-            const Expanded(
+            Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(height: 15),
-                    // Display the place items
-                    DisplayPlace(),
+                    const SizedBox(height: 15),
+                    // Pass selected category to DisplayPlace
+                    DisplayPlace(
+                        displayCategory:
+                            selectedCategory), // Pass the selected category
                   ],
                 ),
               ),
@@ -57,6 +60,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
       stream: categoryCollection.snapshots(),
       builder: (context, streamSnapshot) {
         if (streamSnapshot.hasData) {
+          // Adding "All" category at the beginning of the list
+          var categories = [
+            {
+              'title': 'All',
+              'image': 'https://cdn-icons-png.flaticon.com/512/443/443635.png'
+            }, // Add the "All" category
+            ...streamSnapshot.data!.docs
+                .map((doc) => {
+                      'title': doc['title'],
+                      'image': doc['image'],
+                    })
+                .toList()
+          ];
+
           return Stack(
             children: [
               const Positioned(
@@ -72,14 +89,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 child: ListView.builder(
                   padding: EdgeInsets.zero,
                   scrollDirection: Axis.horizontal,
-                  itemCount: streamSnapshot.data!.docs.length,
+                  itemCount: categories.length,
                   physics: const BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
+                    final category = categories[index];
                     final isSelected = selectedIndex == index;
+
                     return GestureDetector(
                       onTap: () {
                         setState(() {
                           selectedIndex = index;
+                          selectedCategory = category['title'] == 'All'
+                              ? '' // If "All" is selected, set selectedCategory to empty
+                              : category['title'];
                         });
                       },
                       child: Container(
@@ -105,25 +127,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 shape: BoxShape.circle,
                               ),
                               child: Image.network(
-                                streamSnapshot.data!.docs[index]['image'],
+                                category[
+                                    'image'], // Use network image from the list
                                 color: isSelected
-                                    ? (isDarkMode ? Colors.white : Colors.black)
+                                    ? Colors.pinkAccent
                                     : (isDarkMode
                                         ? Colors.white70
                                         : Colors
                                             .black45), // Icon color based on selection
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.error,
+                                      color: Colors
+                                          .red); // Display an error icon if the image fails to load
+                                },
                               ),
                             ),
                             const SizedBox(height: 5),
                             Text(
-                              streamSnapshot.data!.docs[index]['title'],
+                              category['title'],
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isSelected
-                                    ? (isDarkMode
-                                        ? Colors.white
-                                        : Colors
-                                            .black) // Text color when selected
+                                    ? Colors.pinkAccent
                                     : (isDarkMode
                                         ? Colors.white70
                                         : Colors
