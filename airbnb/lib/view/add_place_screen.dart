@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:airbnb/model/place_model.dart';
 
 class AddPlaceScreen extends StatefulWidget {
@@ -32,10 +33,48 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final TextEditingController _longitudeController = TextEditingController();
 
   bool _isActive = true;
+  String? _selectedCategory; // Selected category
+  List<String> _categories = [];
+  bool _isLoadingCategories = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories(); // Fetch categories from Firestore
+  }
+
+  // Fetch categories from Firestore
+  Future<void> _fetchCategories() async {
+    try {
+      final QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('AppCategory').get();
+
+      setState(() {
+        _categories = querySnapshot.docs
+            .map((doc) => doc['title'] as String)
+            .toList();
+        _isLoadingCategories = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCategories = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load categories: $e')),
+      );
+    }
+  }
 
   // Form submit function
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      if (_selectedCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a category.')),
+        );
+        return;
+      }
+
       _formKey.currentState!.save();
 
       // Process image URLs
@@ -50,6 +89,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         date: _dateController.text,
         price: int.parse(_priceController.text),
         address: _addressController.text,
+        category: _selectedCategory!,
         vendor: _vendorController.text,
         vendorProfession: _vendorProfessionController.text,
         vendorProfile: _vendorProfileController.text,
@@ -61,7 +101,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         imageUrls: imageUrls,
       );
 
-      // Call savePlaceToFirebase to save the place
+      // Save place to Firestore
       savePlaceToFirebase(place);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -104,6 +144,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 _buildTextField(_priceController, "Price", theme,
                     isNumeric: true),
                 _buildTextField(_addressController, "Address", theme),
+                _buildCategoryDropdown(theme),
                 _buildTextField(_vendorController, "Vendor", theme),
                 _buildTextField(
                     _vendorProfessionController, "Vendor Profession", theme),
@@ -140,6 +181,56 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Dropdown for selecting category
+  Widget _buildCategoryDropdown(ThemeData theme) {
+    if (_isLoadingCategories) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_categories.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: Text('No categories available.'),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        value: _selectedCategory,
+        decoration: InputDecoration(
+          labelText: "Category",
+          labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        items: _categories.map((category) {
+          return DropdownMenuItem<String>(
+            value: category,
+            child: Text(category),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedCategory = value;
+          });
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "Category is required";
+          }
+          return null;
+        },
       ),
     );
   }
@@ -182,5 +273,11 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       onChanged: onChanged,
       activeColor: theme.primaryColor,
     );
+  }
+
+  // Save place to Firestore
+  Future<void> savePlaceToFirebase(Place place) async {
+    final docRef = FirebaseFirestore.instance.collection('places').doc();
+    await docRef.set(place.toMap());
   }
 }

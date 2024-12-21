@@ -1,4 +1,4 @@
-import 'package:airbnb/Provider/favorite_provider.dart';
+import 'package:airbnb/provider/favorite_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:airbnb/view/place_details_screen.dart';
