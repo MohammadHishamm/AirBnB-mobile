@@ -1,191 +1,113 @@
+// ignore_for_file: prefer_const_constructors, sort_child_properties_last
 
 import 'package:airbnb/components/my_icon_button.dart';
 import 'package:flutter/material.dart';
 import '../model/message_model.dart';
+import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key});
+  const MessagesScreen({super.key, required this.title});
+  final String title;
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
-  List<String> messagesScreenType = ["All", "Traveling", "Support"];
-  int selectedIndex = 0;
+  late OpenAI openAI;
+  TextEditingController controller = TextEditingController();
+  String results = "results to be shown here";
+  List<ChatMessage> messages =
+<ChatMessage>[
+];
+ChatUser openAIuser =
+ChatUser(
+id: '2',
+firstName: 'ChatGPT',
+lastName: 'AI',
+);
+  @override
+  void initState() {
+    super.initState();
+    openAI = OpenAI.instance.build(
+        token:
+            "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",
+        baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
+        enableLog: true);
+  }
+
+  void chatComplete() async {
+    final request = ChatCompleteText(
+        messages: [
+          Map.of({"role": "user", "content": controller.text})
+        ],
+        maxToken: 200,
+        model:
+            GptTurbo0301ChatModel()); //Gpt41106PreviewChatModel());//GptTurbo0301ChatModel());
+    final response = await openAI.onChatCompletion(request: request);
+    for (var element in response!.choices) {
+      print("data -> ${element.message?.content}");
+      results = element.message!.content;
+      ChatMessage msg = ChatMessage(
+          user: openAIuser,
+          createdAt: DateTime.now(),
+          text: element.message!.content);
+      messages.insert(0, msg);
+      setState(() {
+        messages;
+      });
+      setState(() {
+        results;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Spacer(),
-                  MyIconButton(
-                    radius: 23,
-                    icon: Icons.search,
-                    color: Theme.of(context).cardColor,
-                  ),
-                  const SizedBox(width: 10),
-                  MyIconButton(
-                    radius: 23,
-                    icon: Icons.tune,
-                    color: Theme.of(context).cardColor,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Text(
-                "MessagesScreen",
-                style: TextStyle(
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(
-                    messagesScreenType.length,
-                    (index) => GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 22,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: selectedIndex == index
-                                ? Theme.of(context).primaryColor
-                                : Theme.of(context)
-                                    .dividerColor
-                                    .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Text(
-                            messagesScreenType[index],
-                            style: TextStyle(
-                              color: selectedIndex == index
-                                  ? Theme.of(context)
-                                      .primaryTextTheme
-                                      .labelLarge
-                                      ?.color
-                                  : Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.color,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              ...messages.map((message) => _buildMessageItem(message, context)),
-            ],
-          ),
-        ),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
       ),
-    );
-  }
-
-  Widget _buildMessageItem(Message message, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Row(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                height: 85,
-                width: 75,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
-                  borderRadius: BorderRadius.circular(10),
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(message.image),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -10,
-                right: -18,
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(message.vendorImage),
-                  backgroundColor: Theme.of(context).cardColor,
-                  radius: 25,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 25),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      message.name,
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(child: Text(results)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(children: [
+                Expanded(
+                    child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                          hintText: 'Type here...', border: InputBorder.none),
                     ),
-                    Text(
-                      message.date,
-                      style: TextStyle(
-                        fontSize: 17,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  message.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    height: 1.1,
-                    fontSize: 17,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
-                ),
-                Text(
-                  message.duration,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    height: 1.4,
-                    fontSize: 17,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                )),
+                ElevatedButton(
+                  onPressed: () {
+                    chatComplete();
+                  },
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.white,
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
+                  style: ElevatedButton.styleFrom(
+                      shape: CircleBorder(),
+                      padding: EdgeInsets.all(20),
+                      backgroundColor: Colors.blue),
+                )
+              ]),
+            ) // Row
+          ],
+        ),
       ),
     );
   }
