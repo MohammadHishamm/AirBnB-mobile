@@ -39,7 +39,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   children: [
                     const SizedBox(height: 15),
                     // Pass selected category to DisplayPlace
-                    DisplayPlace(displayCategory: selectedCategory),  // Pass the selected category
+                    DisplayPlace(
+                        displayCategory:
+                            selectedCategory), // Pass the selected category
                   ],
                 ),
               ),
@@ -60,11 +62,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
         if (streamSnapshot.hasData) {
           // Adding "All" category at the beginning of the list
           var categories = [
-            {'title': 'All', 'image': 'https://cdn-icons-png.flaticon.com/512/443/443635.png'}, // Add the "All" category
-            ...streamSnapshot.data!.docs.map((doc) => {
-                  'title': doc['title'],
-                  'image': doc['image'],
-                }).toList()
+            {
+              'title': 'All',
+              'image': 'https://cdn-icons-png.flaticon.com/512/443/443635.png'
+            }, // Add the "All" category
+            ...streamSnapshot.data!.docs
+                .map((doc) => {
+                      'title': doc['title'],
+                      'image': doc['image'],
+                    })
+                .toList()
           ];
 
           return Stack(
@@ -112,20 +119,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         child: Column(
                           children: [
                             Container(
-                              height: 48, // Increased icon size for consistent layout
-                              width: 48, // Icon size remains large for consistency
+                              height:
+                                  48, // Increased icon size for consistent layout
+                              width:
+                                  48, // Icon size remains large for consistency
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                               ),
                               child: Image.network(
-                                category['image'], // Use network image from the list
+                                category[
+                                    'image'], // Use network image from the list
                                 color: isSelected
-                                    ? (isDarkMode ? Colors.white : Colors.black)
+                                    ? Colors.pinkAccent
                                     : (isDarkMode
                                         ? Colors.white70
-                                        : Colors.black45), // Icon color based on selection
+                                        : Colors
+                                            .black45), // Icon color based on selection
                                 errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.error, color: Colors.red); // Display an error icon if the image fails to load
+                                  return const Icon(Icons.error,
+                                      color: Colors
+                                          .red); // Display an error icon if the image fails to load
                                 },
                               ),
                             ),
@@ -135,12 +148,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isSelected
-                                    ? (isDarkMode
-                                        ? Colors.white
-                                        : Colors.black) // Text color when selected
+                                    ? Colors.pinkAccent
                                     : (isDarkMode
                                         ? Colors.white70
-                                        : Colors.black45), // Text color when not selected
+                                        : Colors
+                                            .black45), // Text color when not selected
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -149,7 +161,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               width: 50,
                               color: isSelected
                                   ? (isDarkMode ? Colors.white : Colors.black)
-                                  : Colors.transparent, // Underline color when selected
+                                  : Colors
+                                      .transparent, // Underline color when selected
                             ),
                           ],
                         ),

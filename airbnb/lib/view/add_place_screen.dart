@@ -50,9 +50,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           await FirebaseFirestore.instance.collection('AppCategory').get();
 
       setState(() {
-        _categories = querySnapshot.docs
-            .map((doc) => doc['title'] as String)
-            .toList();
+        _categories =
+            querySnapshot.docs.map((doc) => doc['title'] as String).toList();
         _isLoadingCategories = false;
       });
     } catch (e) {
@@ -273,11 +272,5 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       onChanged: onChanged,
       activeColor: theme.primaryColor,
     );
-  }
-
-  // Save place to Firestore
-  Future<void> savePlaceToFirebase(Place place) async {
-    final docRef = FirebaseFirestore.instance.collection('places').doc();
-    await docRef.set(place.toMap());
   }
 }
