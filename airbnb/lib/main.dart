@@ -1,3 +1,4 @@
+import 'package:airbnb/provider/favorite_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:airbnb/provider/Theme_provider.dart';
@@ -5,7 +6,6 @@ import 'package:airbnb/view/Login_screen.dart';
 import 'package:airbnb/view/main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:airbnb/Provider/favorite_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,8 +28,11 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-            create: (_) => ThemeProvider()), // Provider for the theme
-        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+            create: (_) =>
+                ThemeProvider()), // Provides ThemeProvider for managing theme
+        ChangeNotifierProvider(
+            create: (_) =>
+                FavoriteProvider()), // Provides FavoriteProvider for favorites functionality
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
@@ -37,12 +40,10 @@ class MainApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: themeProvider.isDarkMode
                 ? ThemeData.dark().copyWith(
-                    scaffoldBackgroundColor:
-                        Colors.black, // Dark mode background
+                    scaffoldBackgroundColor: Colors.black, // Dark background
                     appBarTheme: const AppBarTheme(
                       backgroundColor: Colors.black,
-                      titleTextStyle: TextStyle(
-                          color: Colors.white), // White text in AppBar
+                      titleTextStyle: TextStyle(color: Colors.white),
                     ),
                     textTheme: const TextTheme(
                       bodyLarge: TextStyle(color: Colors.white),
@@ -51,12 +52,10 @@ class MainApp extends StatelessWidget {
                     ),
                   )
                 : ThemeData.light().copyWith(
-                    scaffoldBackgroundColor:
-                        Colors.white, // Light mode background
+                    scaffoldBackgroundColor: Colors.white, // Light background
                     appBarTheme: const AppBarTheme(
                       backgroundColor: Colors.white,
-                      titleTextStyle: TextStyle(
-                          color: Colors.black), // Black text in AppBar
+                      titleTextStyle: TextStyle(color: Colors.black),
                     ),
                     textTheme: const TextTheme(
                       bodyLarge: TextStyle(color: Colors.black),
@@ -65,12 +64,13 @@ class MainApp extends StatelessWidget {
                     ),
                   ),
             home: StreamBuilder(
-              stream: FirebaseAuth.instance.authStateChanges(),
+              stream: FirebaseAuth.instance
+                  .authStateChanges(), // Stream to listen for login state changes
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return const AppMainScreen(); // After login
+                  return const AppMainScreen(); // Show the main screen when logged in
                 } else {
-                  return const LoginScreen(); // When not logged in
+                  return const LoginScreen(); // Show the login screen when not logged in
                 }
               },
             ),

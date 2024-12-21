@@ -14,19 +14,34 @@ class FavoriteProvider extends ChangeNotifier {
     loadFavorite();
   }
 
-  void toggleFavorite(DocumentSnapshot place) async {
+  void toggleFavorite(DocumentSnapshot place, BuildContext context) async {
     String userId = auth.currentUser?.uid ?? "";
     String placeId = place.id;
     if (userId.isEmpty) return;
 
+    String message;
+
     if (_favoriteIds.contains(placeId)) {
       _favoriteIds.remove(placeId);
       await _removeFavorite(userId, placeId);
+      message = "Removed from Favorites";
     } else {
       _favoriteIds.add(placeId);
       await _addFavorite(userId, placeId);
+      message = "Added to Favorites";
     }
+
+    // Notify listeners for UI updates
     notifyListeners();
+
+    // Show snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration:
+            const Duration(seconds: 2), // SnackBar will be shown for 3 seconds
+      ),
+    );
   }
 
   bool isExist(DocumentSnapshot place) {
