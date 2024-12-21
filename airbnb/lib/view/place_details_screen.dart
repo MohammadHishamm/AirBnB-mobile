@@ -1,7 +1,8 @@
 import 'package:airbnb/Components/my_icon_button.dart';
 import 'package:airbnb/Components/star_rating.dart';
-import 'package:airbnb/Provider/favorite_provider.dart';
+
 import 'package:airbnb/components/location_in_map.dart';
+import 'package:airbnb/provider/favorite_provider.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -449,7 +450,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 // after this all let's make favorite button function by using provider
                 InkWell(
                   onTap: () {
-                    provider.toggleFavorite(widget.place);
+                    provider.toggleFavorite(widget.place, context);
                   },
                   child: MyIconButton(
                     icon: provider.isExist(widget.place)

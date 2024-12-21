@@ -1,4 +1,4 @@
-import 'package:airbnb/Provider/favorite_provider.dart';
+import 'package:airbnb/provider/favorite_provider.dart';
 import 'package:airbnb/view/place_details_screen.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -35,7 +35,8 @@ class _DisplayPlaceState extends State<DisplayPlace> {
             itemCount: streamSnapshot.data!.docs.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
-              final place = streamSnapshot.data!.docs[index];
+              final DocumentSnapshot place = streamSnapshot.data!.docs[index];
+
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
@@ -101,12 +102,6 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                         child: const Padding(
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 15, vertical: 5),
-                                          child: Text(
-                                            "GuestFavorite",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
                                         ),
                                       )
                                     : SizedBox(width: size.width * 0.03),
@@ -121,7 +116,7 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                     ),
                                     InkWell(
                                       onTap: () {
-                                        provider.toggleFavorite(place);
+                                        provider.toggleFavorite(place, context);
                                       },
                                       child: Icon(
                                         Icons.favorite,
