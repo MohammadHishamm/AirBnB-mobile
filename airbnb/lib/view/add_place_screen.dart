@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:airbnb/model/place_model.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class AddPlaceScreen extends StatefulWidget {
   const AddPlaceScreen({super.key});
 
@@ -11,6 +11,8 @@ class AddPlaceScreen extends StatefulWidget {
 
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _formKey = GlobalKey<FormState>();
+  // Get the user details from Firebase Authentication
+  final user = FirebaseAuth.instance.currentUser;
 
   // Controllers for each form field
   final TextEditingController _titleController = TextEditingController();
@@ -81,6 +83,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           _imageController.text.split(',').map((url) => url.trim()).toList();
 
       final place = Place(
+        userid: user!.uid,
         title: _titleController.text,
         isActive: _isActive,
         image: imageUrls.isNotEmpty ? imageUrls.first : "",

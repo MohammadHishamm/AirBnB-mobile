@@ -19,6 +19,7 @@ Future<void> savePlaceToFirebase(Place place) async {
 
 
 class Place {
+  final String userid;
   final String title;
   bool isActive;
   final String image;
@@ -38,6 +39,7 @@ class Place {
   final List<String> imageUrls;
 
   Place({
+    required this.userid,
     required this.title,
     required this.isActive,
     required this.image,
@@ -59,6 +61,7 @@ class Place {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'userid': userid,
       'title': title,
       'isActive': isActive,
       'image': image,
@@ -83,6 +86,7 @@ class Place {
 
 final List<Place> listOfPlace = [
   Place(
+    userid: "1",
     isActive: true,
     title: "Nice small bedroom in a nice small house",
     image:
@@ -109,6 +113,7 @@ final List<Place> listOfPlace = [
     ],
   ),
   Place(
+    userid: "1",
     isActive: false,
     title: "Cosy room in fabulous condo!",
     image:
@@ -134,6 +139,7 @@ final List<Place> listOfPlace = [
     ],
   ),
   Place(
+    userid: "1",
     isActive: true,
     title: "Bright room in nice apartment bas faron",
     image: "https://www.theindiahotel.com/extra-images/banner-01.jpg",
@@ -160,6 +166,7 @@ final List<Place> listOfPlace = [
     ],
   ),
   Place(
+    userid: "1",
     isActive: true,
     title: "Connect with your heart to this magical place",
     image:
@@ -185,6 +192,7 @@ final List<Place> listOfPlace = [
     ],
   ),
   Place(
+    userid: "1",
     isActive: false,
     title: "En-Suite @ Sunrise Beach",
     image: "https://media.timeout.com/images/105162711/image.jpg",
