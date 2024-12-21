@@ -32,8 +32,7 @@ lastName: 'AI',
     super.initState();
     openAI = OpenAI.instance.build(
         token:
-           // "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",
-        baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
+             baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
         enableLog: true);
   }
 
