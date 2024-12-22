@@ -16,16 +16,7 @@ Future<void> savePlaceToFirebase(Place place) async {
   await ref.doc(id).set(place.toMap());
 }
 
-enum CategoryType {
-  rooms,
-  icons,
-  surfing,
-  design,
-  amazingViews,
-  newplaces,
-  bedAndBreakfasts,
-  houseboats,
-}
+
 
 class Place {
   final String title;
@@ -35,7 +26,7 @@ class Place {
   final String date;
   final int price;
   final String address;
-  final CategoryType category;  // Changed this from String to CategoryType
+  final String category;
   final String vendor;
   final String vendorProfession;
   final String vendorProfile;
@@ -54,7 +45,7 @@ class Place {
     required this.date,
     required this.price,
     required this.address,
-    required this.category,  // Use the enum here
+    required this.category,
     required this.vendor,
     required this.vendorProfession,
     required this.vendorProfile,
@@ -63,7 +54,7 @@ class Place {
     required this.yearOfHostin,
     required this.latitude,
     required this.longitude,
-    required this.imageUrls,
+    required this.imageUrls, 
   });
 
   Map<String, dynamic> toMap() {
@@ -75,7 +66,7 @@ class Place {
       'date': date,
       'price': price,
       'address': address,
-      'category': category.toString().split('.').last,  // Convert enum to string
+      'category':category,
       'vendor': vendor,
       'vendorProfession': vendorProfession,
       'vendorProfile': vendorProfile,
@@ -102,7 +93,7 @@ final List<Place> listOfPlace = [
     date: "Nov 11-16",
     price: 38,
     address: "Kathmandu, Nepal",
-    category: CategoryType.design,
+    category: "",
     vendor: "Marianne",
     vendorProfession: "Retired",
     yearOfHostin: 10,
@@ -129,7 +120,7 @@ final List<Place> listOfPlace = [
     bedAndBathroom: "1 double bed . Shared bathroom",
     price: 88,
     address: "Cape Town, South Africa",
-    category: CategoryType.design,
+    category: "",
     vendor: "Tracey",
     vendorProfession: "Holistic therapist",
     vendorProfile:
@@ -150,7 +141,7 @@ final List<Place> listOfPlace = [
     date: "Oct 10-16",
     price: 34,
     address: "Mumbai, India",
-    category: CategoryType.design,
+    category: "",
     yearOfHostin: 4,
     review: 160,
     bedAndBathroom: "1 bed . Shared bathroom",
@@ -177,7 +168,7 @@ final List<Place> listOfPlace = [
     date: "Dec 17-22",
     price: 76,
     address: "Lyon, France",
-    category: CategoryType.design,
+    category: "",
     yearOfHostin: 8,
     review: 236,
     bedAndBathroom: "2 queen beds . Shared bathroom",
@@ -204,7 +195,7 @@ final List<Place> listOfPlace = [
     yearOfHostin: 10,
     bedAndBathroom: "1 double bed . Dedicated bathroom",
     address: "Rome, Italy",
-    category: CategoryType.design,
+    category: "",
     vendor: "Leva",
     vendorProfession: "Teacher",
     vendorProfile:
