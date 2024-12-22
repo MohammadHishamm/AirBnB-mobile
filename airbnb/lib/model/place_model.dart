@@ -2,6 +2,9 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
+
+
 Future<void> savePlaceToFirebase(Place place) async {
   final CollectionReference ref =
       FirebaseFirestore.instance.collection("myAppCollection");
@@ -13,6 +16,17 @@ Future<void> savePlaceToFirebase(Place place) async {
   await ref.doc(id).set(place.toMap());
 }
 
+enum CategoryType {
+  rooms,
+  icons,
+  surfing,
+  design,
+  amazingViews,
+  newplaces,
+  bedAndBreakfasts,
+  houseboats,
+}
+
 class Place {
   final String title;
   bool isActive;
@@ -21,6 +35,7 @@ class Place {
   final String date;
   final int price;
   final String address;
+  final CategoryType category;  // Changed this from String to CategoryType
   final String vendor;
   final String vendorProfession;
   final String vendorProfile;
@@ -31,23 +46,25 @@ class Place {
   final double longitude;
   final List<String> imageUrls;
 
-  Place(
-      {required this.title,
-      required this.isActive,
-      required this.image,
-      required this.rating,
-      required this.date,
-      required this.price,
-      required this.address,
-      required this.vendor,
-      required this.vendorProfession,
-      required this.vendorProfile,
-      required this.review,
-      required this.bedAndBathroom,
-      required this.yearOfHostin,
-      required this.latitude,
-      required this.longitude,
-      required this.imageUrls});
+  Place({
+    required this.title,
+    required this.isActive,
+    required this.image,
+    required this.rating,
+    required this.date,
+    required this.price,
+    required this.address,
+    required this.category,  // Use the enum here
+    required this.vendor,
+    required this.vendorProfession,
+    required this.vendorProfile,
+    required this.review,
+    required this.bedAndBathroom,
+    required this.yearOfHostin,
+    required this.latitude,
+    required this.longitude,
+    required this.imageUrls,
+  });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -58,6 +75,7 @@ class Place {
       'date': date,
       'price': price,
       'address': address,
+      'category': category.toString().split('.').last,  // Convert enum to string
       'vendor': vendor,
       'vendorProfession': vendorProfession,
       'vendorProfile': vendorProfile,
@@ -71,6 +89,7 @@ class Place {
   }
 }
 
+
 final List<Place> listOfPlace = [
   Place(
     isActive: true,
@@ -83,6 +102,7 @@ final List<Place> listOfPlace = [
     date: "Nov 11-16",
     price: 38,
     address: "Kathmandu, Nepal",
+    category: CategoryType.design,
     vendor: "Marianne",
     vendorProfession: "Retired",
     yearOfHostin: 10,
@@ -109,6 +129,7 @@ final List<Place> listOfPlace = [
     bedAndBathroom: "1 double bed . Shared bathroom",
     price: 88,
     address: "Cape Town, South Africa",
+    category: CategoryType.design,
     vendor: "Tracey",
     vendorProfession: "Holistic therapist",
     vendorProfile:
@@ -129,6 +150,7 @@ final List<Place> listOfPlace = [
     date: "Oct 10-16",
     price: 34,
     address: "Mumbai, India",
+    category: CategoryType.design,
     yearOfHostin: 4,
     review: 160,
     bedAndBathroom: "1 bed . Shared bathroom",
@@ -155,6 +177,7 @@ final List<Place> listOfPlace = [
     date: "Dec 17-22",
     price: 76,
     address: "Lyon, France",
+    category: CategoryType.design,
     yearOfHostin: 8,
     review: 236,
     bedAndBathroom: "2 queen beds . Shared bathroom",
@@ -181,6 +204,7 @@ final List<Place> listOfPlace = [
     yearOfHostin: 10,
     bedAndBathroom: "1 double bed . Dedicated bathroom",
     address: "Rome, Italy",
+    category: CategoryType.design,
     vendor: "Leva",
     vendorProfession: "Teacher",
     vendorProfile:

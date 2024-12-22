@@ -32,10 +32,18 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final TextEditingController _longitudeController = TextEditingController();
 
   bool _isActive = true;
+  CategoryType? _selectedCategory; // Selected category
 
   // Form submit function
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      if (_selectedCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a category.')),
+        );
+        return;
+      }
+
       _formKey.currentState!.save();
 
       // Process image URLs
@@ -50,6 +58,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         date: _dateController.text,
         price: int.parse(_priceController.text),
         address: _addressController.text,
+        category: _selectedCategory!, // Assign selected category
         vendor: _vendorController.text,
         vendorProfession: _vendorProfessionController.text,
         vendorProfile: _vendorProfileController.text,
@@ -104,6 +113,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 _buildTextField(_priceController, "Price", theme,
                     isNumeric: true),
                 _buildTextField(_addressController, "Address", theme),
+                _buildCategoryDropdown(theme), // Add dropdown here
                 _buildTextField(_vendorController, "Vendor", theme),
                 _buildTextField(
                     _vendorProfessionController, "Vendor Profession", theme),
@@ -140,6 +150,40 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Dropdown for selecting category
+  Widget _buildCategoryDropdown(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<CategoryType>(
+        value: _selectedCategory,
+        decoration: InputDecoration(
+          labelText: "Category",
+          labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        items: CategoryType.values.map((category) {
+          return DropdownMenuItem<CategoryType>(
+            value: category,
+            child: Text(category.toString().split('.').last),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedCategory = value;
+          });
+        },
+        validator: (value) {
+          if (value == null) {
+            return "Category is required";
+          }
+          return null;
+        },
       ),
     );
   }
@@ -184,3 +228,4 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
   }
 }
+
