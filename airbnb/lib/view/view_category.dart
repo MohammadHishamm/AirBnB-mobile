@@ -14,7 +14,27 @@ class _CategoriesPageState extends State<CategoriesPage> {
   final CollectionReference placesRef =
       FirebaseFirestore.instance.collection("myAppCollection");
 
-  //function
+  Future<void> deleteCategory(String categoryId, String categoryTitle) async {
+    try {
+      // Delete places associated with the category
+      final QuerySnapshot placesSnapshot =
+          await placesRef.where('category', isEqualTo: categoryTitle).get();
+
+      for (var doc in placesSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Delete the category
+      await categoriesRef.doc(categoryId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Category and associated places deleted.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting category: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
