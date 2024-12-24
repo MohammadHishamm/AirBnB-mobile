@@ -1,4 +1,5 @@
 import 'package:airbnb/Components/display_place.dart';
+import 'package:airbnb/components/map_with_custom_info_windows.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -49,6 +50,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
           ],
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: const MapWithCustomInfoWindows(),
       // Optional: Floating action button or other features can be added here
     );
   }
