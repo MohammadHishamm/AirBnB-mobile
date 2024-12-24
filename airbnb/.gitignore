@@ -41,3 +41,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Secure API keys
+android/local.properties
+
+# Flutter environment-specific files
+.env
+.env.*
+
+# Keystore files (used for app signing)
+*.keystore
+*.jks

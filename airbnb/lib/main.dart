@@ -30,9 +30,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(
             create: (_) =>
                 ThemeProvider()), // Provides ThemeProvider for managing theme
-        ChangeNotifierProvider(
-            create: (_) =>
-                FavoriteProvider()), // Provides FavoriteProvider for favorites functionality
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

@@ -17,12 +17,12 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
   LatLng myCurrentLocation = const LatLng(27.7172, 85.3240);
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
   late GoogleMapController googleMapController;
-  // first you need to add a plackge called custom_info_window
+
   final CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
-  // firebase collection to load latlng of place
+
   final CollectionReference placeCollection =
-      FirebaseFirestore.instance.collection("myAppCpollection");
+      FirebaseFirestore.instance.collection("myAppCollection");
 
   List<Marker> markers = [];
   @override
@@ -35,7 +35,7 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
   Future<void> _loadMarkers() async {
     customIcon = await BitmapDescriptor.asset(
       const ImageConfiguration(),
-      "asset/images/marker.png",
+      "assets/images/marker.png",
       height: 40,
       width: 30,
     );
