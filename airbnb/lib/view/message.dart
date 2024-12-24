@@ -25,14 +25,16 @@ class _MyMessagesScreen extends State<MessagesScreen> {
     final message = _userInput.text;
 
     setState(() {
-      _messages.add(Message(isUser: true, message: message, date: DateTime.now()));
+      _messages
+          .add(Message(isUser: true, message: message, date: DateTime.now()));
     });
 
     final content = [Content.text(message)];
     final response = await model.generateContent(content);
 
     setState(() {
-      _messages.add(Message(isUser: false, message: response.text ?? "", date: DateTime.now()));
+      _messages.add(Message(
+          isUser: false, message: response.text ?? "", date: DateTime.now()));
       _userInput.text = "";
       _canSendMessage = false; // Disable the button after sending
     });
@@ -58,7 +60,7 @@ class _MyMessagesScreen extends State<MessagesScreen> {
           onPressed: () {
             Navigator.pop(context); // This will navigate back
           },
-        ), 
+        ),
       ),
       body: Container(
         child: Column(
@@ -69,7 +71,10 @@ class _MyMessagesScreen extends State<MessagesScreen> {
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
                       final message = _messages[index];
-                      return Messages(isUser: message.isUser, message: message.message, date: DateFormat('HH:mm').format(message.date));
+                      return Messages(
+                          isUser: message.isUser,
+                          message: message.message,
+                          date: DateFormat('HH:mm').format(message.date));
                     })),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -78,13 +83,28 @@ class _MyMessagesScreen extends State<MessagesScreen> {
                   Expanded(
                     flex: 15,
                     child: TextFormField(
-                      style: TextStyle(color: Colors.black),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge, // Dynamically adjust text style
                       controller: _userInput,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        label: Text('Enter Your Message'),
+                        labelText: 'Enter Your Message',
+                        labelStyle: TextStyle(
+                          color:
+                              Theme.of(context).hintColor, // Adapt label color
+                        ),
+                        hintText: 'Type something...',
+                        hintStyle: TextStyle(
+                          color: Theme.of(context)
+                              .hintColor
+                              .withOpacity(0.6), // Hint color adaptation
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context)
+                            .cardColor, // Adjust background color in dark mode
                       ),
                     ),
                   ),
@@ -156,11 +176,13 @@ class Messages extends StatelessWidget {
         children: [
           Text(
             message,
-            style: TextStyle(fontSize: 16, color: isUser ? Colors.white : Colors.black),
+            style: TextStyle(
+                fontSize: 16, color: isUser ? Colors.white : Colors.black),
           ),
           Text(
             date,
-            style: TextStyle(fontSize: 10, color: isUser ? Colors.white : Colors.black),
+            style: TextStyle(
+                fontSize: 10, color: isUser ? Colors.white : Colors.black),
           ),
         ],
       ),
