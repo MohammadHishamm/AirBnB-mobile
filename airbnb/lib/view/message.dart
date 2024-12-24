@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -55,7 +55,33 @@ class _MyMessagesScreen extends State<MessagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-       
+        backgroundColor: Colors.greenAccent, // Stylish background color
+        elevation: 4, // Subtle shadow for the AppBar
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline, // Chatbot icon
+              color: Colors.white,
+              size: 28,
+            ),
+            SizedBox(width: 10), // Add spacing between icon and text
+            Text(
+              "Chatbot Assistant", // Descriptive title
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true, // Center align title and icon
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(15), // Rounded bottom corners
+          ),
+        ),
       ),
       body: Container(
         child: Column(
