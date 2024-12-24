@@ -39,13 +39,35 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
 
   void _deletePlace(int index, String placeId) async {
     try {
+      // Remove the place locally
       setState(() {
         userPlaces.removeAt(index);
       });
+
+      // Delete the place from the main collection
       await FirebaseFirestore.instance.collection('myAppCollection').doc(placeId).delete();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Place deleted")),
-      );
+
+      // Access the userFavorites collection to delete the place from all users' favorites
+      final userFavoritesSnapshot = await FirebaseFirestore.instance.collection('userFavorites').get();
+
+for (var userDoc in userFavoritesSnapshot.docs) {
+  // Access the favorites subcollection for each user
+  final favoritesSnapshot = await FirebaseFirestore.instance
+      .collection('userFavorites')
+      .doc(userDoc.id) // Ensure userDoc.id is valid
+      .collection('favorites')
+      .where(FieldPath.documentId, isEqualTo: placeId) // Ensure placeId is valid
+      .get();
+
+  for (var favoriteDoc in favoritesSnapshot.docs) {
+    await FirebaseFirestore.instance
+        .collection('userFavorites')
+        .doc(userDoc.id)
+        .collection('favorites')
+        .doc(favoriteDoc.id)
+        .delete();
+  }
+}
     } catch (e) {
       print('Error deleting place: $e');
     }
@@ -82,14 +104,7 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
                       ),
                     )
                   : Expanded(
-                      child: ReorderableListView.builder(
-                        onReorder: (oldIndex, newIndex) {
-                          setState(() {
-                            if (oldIndex < newIndex) newIndex--;
-                            final item = userPlaces.removeAt(oldIndex);
-                            userPlaces.insert(newIndex, item);
-                          });
-                        },
+                      child: ListView.builder(
                         itemCount: userPlaces.length,
                         itemBuilder: (context, index) {
                           final place = userPlaces[index];
@@ -115,26 +130,70 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
                               child: Card(
                                 elevation: 3,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(15), // Match the card's radius
                                 ),
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(15),
                                   child: Row(
                                     children: [
                                       Image.network(
                                         place['image'], // Image URL from Firestore
-                                        height: 60,
-                                        width: 60,
+                                        height: 100,
+                                        width: 100,
                                         fit: BoxFit.cover,
                                       ),
-                                      const SizedBox(width: 10),
+                                      const SizedBox(width: 15),
                                       Expanded(
-                                        child: Text(
-                                          place['title'], // Title from Firestore
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                          overflow: TextOverflow.ellipsis,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              place['title'], // Title from Firestore
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              "Category: ${place['category']}",
+                                              style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              "Price: \$${place['price']}",
+                                              style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.location_on, size: 16, color: Colors.redAccent),
+                                                const SizedBox(width: 5),
+                                                Expanded(
+                                                  child: Text(
+                                                    place['address'] ?? 'Unknown location',
+                                                    style: const TextStyle(fontSize: 14),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      // Drag handle icon
+                                      Icon(
+                                        Icons.drag_handle_rounded,
+                                        color: const Color.fromARGB(255, 0, 0, 0),
                                       ),
                                     ],
                                   ),

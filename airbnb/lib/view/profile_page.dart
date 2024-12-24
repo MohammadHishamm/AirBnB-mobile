@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb/Authentication/google_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:airbnb/view/add_category.dart';
+import 'package:airbnb/view/view_category.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -197,8 +199,6 @@ class ProfilePage extends StatelessWidget {
                   child: profileInfo(
                       context, Icons.add_home_outlined, "List your space"),
                 ),
-
-
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -210,7 +210,27 @@ class ProfilePage extends StatelessWidget {
                   child: profileInfo(
                       context, Icons.view_compact, "View your space"),
                 ),
-
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddCategoryPage()),
+                    );
+                  },
+                  child: profileInfo(
+                      context, Icons.category_rounded, "Add category"),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CategoriesPage()),
+                    );
+                  },
+                  child: profileInfo(
+                      context, Icons.view_comfy_alt_rounded, "View categories"),
+                ),
                 profileInfo(
                     context, Icons.home_outlined, "Learn about hosting"),
                 const SizedBox(height: 15),

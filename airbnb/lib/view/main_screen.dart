@@ -21,7 +21,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
       const ExploreScreen(),
       const Wishlists(),
       const Scaffold(),
-      const MessagesScreen(title: "Chat with GPT"),
+      const MessagesScreen(),
       const ProfilePage(),
     ];
     super.initState();
