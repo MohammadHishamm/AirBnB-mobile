@@ -7,7 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key});
+  final String userId; // Add user ID
+
+   MessagesScreen({super.key, required this.userId});
+
 
   @override
   State<MessagesScreen> createState() => _MyMessagesScreen();
@@ -35,32 +38,32 @@ class _MyMessagesScreen extends State<MessagesScreen> {
   }
 
   Future<void> _loadMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final messagesJson = prefs.getString('messages');
-    if (messagesJson != null) {
-      setState(() {
-        _messages = (json.decode(messagesJson) as List)
-            .map((e) => Message(
-                  isUser: e['isUser'],
-                  message: e['message'],
-                  date: DateTime.parse(e['date']),
-                ))
-            .toList();
-      });
-    }
+  final prefs = await SharedPreferences.getInstance();
+  final messagesJson = prefs.getString('messages_${widget.userId}'); // Use userId
+  if (messagesJson != null) {
+    setState(() {
+      _messages = (json.decode(messagesJson) as List)
+          .map((e) => Message(
+                isUser: e['isUser'],
+                message: e['message'],
+                date: DateTime.parse(e['date']),
+              ))
+          .toList();
+    });
   }
+}
 
   Future<void> _saveMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final messagesJson = json.encode(_messages.map((m) {
-      return {
-        'isUser': m.isUser,
-        'message': m.message,
-        'date': m.date.toIso8601String(),
-      };
-    }).toList());
-    await prefs.setString('messages', messagesJson);
-  }
+  final prefs = await SharedPreferences.getInstance();
+  final messagesJson = json.encode(_messages.map((m) {
+    return {
+      'isUser': m.isUser,
+      'message': m.message,
+      'date': m.date.toIso8601String(),
+    };
+  }).toList());
+  await prefs.setString('messages_${widget.userId}', messagesJson); // Use userId
+}
 
   Future<void> sendMessage() async {
     final message = _userInput.text;

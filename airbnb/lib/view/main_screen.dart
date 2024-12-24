@@ -2,6 +2,7 @@ import 'package:airbnb/view/explore_screen.dart';
 import 'package:airbnb/view/message.dart';
 import 'package:airbnb/view/profile_page.dart';
 import 'package:airbnb/view/wishlists.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AppMainScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class AppMainScreen extends StatefulWidget {
 class _AppMainScreenState extends State<AppMainScreen> {
   int selectedIndex = 0;
   late final List<Widget> page;
+  final String userID = FirebaseAuth.instance.currentUser?.uid ?? "";
 
   @override
   void initState() {
@@ -21,7 +23,7 @@ class _AppMainScreenState extends State<AppMainScreen> {
       const ExploreScreen(),
       const Wishlists(),
       const Scaffold(),
-      const MessagesScreen(),
+       MessagesScreen(userId: userID,),
       const ProfilePage(),
     ];
     super.initState();
