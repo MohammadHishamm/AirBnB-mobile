@@ -23,7 +23,9 @@ def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
-
+ext {
+    mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
+}
 android {
     namespace = "com.example.airbnb"
     compileSdk = flutter.compileSdkVersion
@@ -51,7 +53,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        resValue "string", "MAPS_API_KEY", mapsApiKey
+        resValue "string", "MAPS_API_KEY", mapsApiKey ?: ""
     }
 
     buildTypes {
