@@ -1,161 +1,154 @@
 import 'package:flutter/material.dart';
-import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
-import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:intl/intl.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key, required this.title});
   final String title;
+
   @override
   State<MessagesScreen> createState() => _MyMessagesScreen();
 }
 
 class _MyMessagesScreen extends State<MessagesScreen> {
-  TextEditingController controller = TextEditingController();
-  String results = "results to be shown here";
-  late OpenAI openAI;
+  final TextEditingController _userInput = TextEditingController();
 
-  List<ChatMessage> messages = <ChatMessage>[];
-  ChatUser userMe = ChatUser(
-    id: '1',
-    firstName: 'Taraggy',
-    lastName: 'Ghanim',
-  );
-  ChatUser openAIuser = ChatUser(
-    id: '2',
-    firstName: 'ChatGPT',
-    lastName: 'AI',
-  );
+  static const apiKey = "AIzaSyAA0mXY7QvNjjmku7OuAiMBTeRxpy0wS0s";
 
-  @override
-  void initState() {
-    super.initState();
-    openAI = OpenAI.instance.build(
-        token: "",
-        baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 25)),
-        enableLog: true);
-  }
+  final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
 
-  void chatComplete() async {
-    if (controller.text.trim().isEmpty) {
-      print("Input is empty. Please type a message.");
-      return;
-    }
+  final List<Message> _messages = [];
 
-    try {
-      final request = ChatCompleteText(
-        messages: [
-          {"role": "user", "content": controller.text}
-        ],
-        maxToken: 100, // Reduce token limit for lower usage
-        model: GptTurbo0631Model(), // Specify GPT-3.5-Turbo
-      );
+  Future<void> sendMessage() async {
+    final message = _userInput.text;
 
-      controller.text = "";
+    setState(() {
+      _messages.add(Message(isUser: true, message: message, date: DateTime.now()));
+    });
 
-      final response = await openAI.onChatCompletion(request: request);
+    final content = [Content.text(message)];
+    final response = await model.generateContent(content);
 
-      if (response == null || response.choices.isEmpty) {
-        print("No response from the API.");
-        return;
-      }
-
-      for (var element in response.choices) {
-        final content = element.message?.content;
-        if (content != null) {
-          print("data -> $content");
-
-          results = content;
-          ChatMessage msg = ChatMessage(
-            user: openAIuser,
-            createdAt: DateTime.now(),
-            text: content,
-          );
-
-          setState(() {
-            messages.insert(0, msg);
-          });
-        }
-      }
-    } catch (e) {
-      if (e.toString().contains('insufficient_quota')) {
-        print("You have exceeded your free quota. Please wait for the reset.");
-      } else {
-        print("Error during chat completion: $e");
-      }
-    }
-  }
-
-  Future<void> _generateImage() async {
-    var prompt = controller.text;
-    final request = GenerateImage(
-        model: DallE2(),
-        prompt,
-        1,
-        size: ImageSize.size256,
-        responseFormat: Format.url);
-    GenImgResponse? response = await openAI.generateImage(request);
-    print("img url :${response?.data?.last?.url}");
+    setState(() {
+      _messages.add(Message(isUser: false, message: response.text ?? "", date: DateTime.now()));
+      _userInput.text = "";
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // This will navigate back
+          },
+        ),
+        title: Text("Chat with our bot"),
+        backgroundColor: Colors.green, // Set the navbar color to green
       ),
-      body: Center(
+      body: Container(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
             Expanded(
-                child: DashChat(
-              messages: messages,
-              currentUser: userMe,
-              onSend: (m) {},
-              readOnly: true,
-            )),
+                child: ListView.builder(
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final message = _messages[index];
+                      return Messages(isUser: message.isUser, message: message.message, date: DateFormat('HH:mm').format(message.date));
+                    })),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(children: [
-                Expanded(
-                    child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: controller,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 15,
+                    child: TextFormField(
+                      style: TextStyle(color: Colors.black),
+                      controller: _userInput,
                       decoration: InputDecoration(
-                          hintText: 'Type here...', border: InputBorder.none),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          label: Text('Enter Your Message')),
                     ),
                   ),
-                )),
-                ElevatedButton(
-                  onPressed: () {
-                    ChatMessage msg = ChatMessage(
-                        user: userMe,
-                        createdAt: DateTime.now(),
-                        text: controller.text);
-                    messages.add(msg); // note the add function effect
-                    setState(() {
-                      messages;
-                    });
-                    chatComplete();
-                  },
-                  child: Icon(
-                    Icons.send,
-                    color: Colors.white,
+                  Spacer(),
+                  IconButton(
+                    padding: EdgeInsets.all(12),
+                    iconSize: 30,
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.black),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
+                      shape: WidgetStateProperty.all(CircleBorder())
+                    ),
+                    onPressed: () {
+                      sendMessage();
+                    },
+                    icon: Icon(Icons.send),
                   ),
-                  style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(20),
-                      backgroundColor: Colors.blue),
-                )
-              ]),
-            ) // Row
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class Message {
+  final bool isUser;
+  final String message;
+  final DateTime date;
+
+  Message({required this.isUser, required this.message, required this.date});
+}
+
+class Messages extends StatelessWidget {
+  final bool isUser;
+  final String message;
+  final String date;
+
+  const Messages({
+    super.key,
+    required this.isUser,
+    required this.message,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(vertical: 15).copyWith(
+        left: isUser ? 100 : 10,
+        right: isUser ? 10 : 100,
+      ),
+      decoration: BoxDecoration(
+        color: isUser ? Colors.blueAccent : Colors.grey.shade400,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          bottomLeft: isUser ? Radius.circular(10) : Radius.zero,
+          topRight: Radius.circular(10),
+          bottomRight: isUser ? Radius.zero : Radius.circular(10),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            message,
+            style: TextStyle(fontSize: 16, color: isUser ? Colors.white : Colors.black),
+          ),
+          Text(
+            date,
+            style: TextStyle(fontSize: 10, color: isUser ? Colors.white : Colors.black),
+          ),
+        ],
       ),
     );
   }
