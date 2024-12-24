@@ -55,12 +55,7 @@ class _MyMessagesScreen extends State<MessagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // This will navigate back
-          },
-        ),
+       
       ),
       body: Container(
         child: Column(
