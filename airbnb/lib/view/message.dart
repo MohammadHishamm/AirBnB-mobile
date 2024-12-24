@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -19,7 +21,46 @@ class _MyMessagesScreen extends State<MessagesScreen> {
 
   final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
 
-  final List<Message> _messages = [];
+  List<Message> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages(); // Load messages from shared_preferences
+    _userInput.addListener(() {
+      setState(() {
+        _canSendMessage = _userInput.text.trim().isNotEmpty;
+      });
+    });
+  }
+
+  Future<void> _loadMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final messagesJson = prefs.getString('messages');
+    if (messagesJson != null) {
+      setState(() {
+        _messages = (json.decode(messagesJson) as List)
+            .map((e) => Message(
+                  isUser: e['isUser'],
+                  message: e['message'],
+                  date: DateTime.parse(e['date']),
+                ))
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _saveMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final messagesJson = json.encode(_messages.map((m) {
+      return {
+        'isUser': m.isUser,
+        'message': m.message,
+        'date': m.date.toIso8601String(),
+      };
+    }).toList());
+    await prefs.setString('messages', messagesJson);
+  }
 
   Future<void> sendMessage() async {
     final message = _userInput.text;
@@ -28,6 +69,7 @@ class _MyMessagesScreen extends State<MessagesScreen> {
       _messages
           .add(Message(isUser: true, message: message, date: DateTime.now()));
     });
+    await _saveMessages();
 
     final content = [Content.text(message)];
     final response = await model.generateContent(content);
@@ -38,17 +80,7 @@ class _MyMessagesScreen extends State<MessagesScreen> {
       _userInput.text = "";
       _canSendMessage = false; // Disable the button after sending
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Listen to the text field input to toggle the "Send" button
-    _userInput.addListener(() {
-      setState(() {
-        _canSendMessage = _userInput.text.trim().isNotEmpty;
-      });
-    });
+    await _saveMessages(); // Save the updated messages
   }
 
   @override
