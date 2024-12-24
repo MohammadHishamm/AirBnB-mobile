@@ -55,7 +55,7 @@ class _MyMessagesScreen extends State<MessagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent, // Stylish background color
+        backgroundColor: Colors.pinkAccent, // Stylish background color
         elevation: 4, // Subtle shadow for the AppBar
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,

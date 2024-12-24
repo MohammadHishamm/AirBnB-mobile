@@ -1,37 +1,39 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
-
-
-
-Future<void> savePlaceToFirebase(Place place) async {
+Future<void> savePlaceToFirebase(Place place, BuildContext context) async {
   final CollectionReference ref =
       FirebaseFirestore.instance.collection("myAppCollection");
 
   final String id =
       DateTime.now().toIso8601String() + Random().nextInt(1000).toString();
 
-  // Save the individual place object to Firebase
-  await ref.doc(id).set(place.toMap());
+  try {
+    // Save the individual place object to Firebase
+    await ref.doc(id).set(place.toMap());
+    print("Place saved successfully: $id");
+  } catch (e) {
+    print("Error saving place: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Failed to save place: $e")),
+    );
+  }
 }
-
-
 
 class Place {
   final String userid;
   final String title;
   bool isActive;
   final String image;
-  final double rating;
+
   final String date;
   final int price;
   final String address;
   final String category;
   final String vendor;
-  final String vendorProfession;
-  final String vendorProfile;
-  final int review;
+
   final String bedAndBathroom;
   final int yearOfHostin;
   final double latitude;
@@ -43,20 +45,16 @@ class Place {
     required this.title,
     required this.isActive,
     required this.image,
-    required this.rating,
     required this.date,
     required this.price,
     required this.address,
     required this.category,
     required this.vendor,
-    required this.vendorProfession,
-    required this.vendorProfile,
-    required this.review,
     required this.bedAndBathroom,
     required this.yearOfHostin,
     required this.latitude,
     required this.longitude,
-    required this.imageUrls, 
+    required this.imageUrls,
   });
 
   Map<String, dynamic> toMap() {
@@ -65,15 +63,11 @@ class Place {
       'title': title,
       'isActive': isActive,
       'image': image,
-      'rating': rating,
       'date': date,
       'price': price,
       'address': address,
-      'category':category,
+      'category': category,
       'vendor': vendor,
-      'vendorProfession': vendorProfession,
-      'vendorProfile': vendorProfile,
-      'review': review,
       'bedAndBathroom': bedAndBathroom,
       'yearOfHostin': yearOfHostin,
       'latitude': latitude,
@@ -83,7 +77,6 @@ class Place {
   }
 }
 
-
 final List<Place> listOfPlace = [
   Place(
     userid: "1",
@@ -91,18 +84,13 @@ final List<Place> listOfPlace = [
     title: "Nice small bedroom in a nice small house",
     image:
         "https://www.momondo.in/himg/b1/a8/e3/revato-1172876-6930557-765128.jpg",
-    rating: 4.85,
-    review: 126,
     bedAndBathroom: "1 bed . Shared bathroom",
     date: "Nov 11-16",
     price: 38,
     address: "Kathmandu, Nepal",
     category: "",
     vendor: "Marianne",
-    vendorProfession: "Retired",
     yearOfHostin: 10,
-    vendorProfile:
-        "https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg?w=1200&h=992&fl=progressive&q=70&fm=jpg",
     latitude: 27.7293,
     longitude: 85.3343,
     imageUrls: [
@@ -118,18 +106,13 @@ final List<Place> listOfPlace = [
     title: "Cosy room in fabulous condo!",
     image:
         "https://www.telegraph.co.uk/content/dam/Travel/hotels/2023/september/one-and-only-cape-town-product-image.jpg",
-    rating: 4.55,
     date: "Oct 01-06",
-    review: 26,
     yearOfHostin: 6,
     bedAndBathroom: "1 double bed . Shared bathroom",
     price: 88,
     address: "Cape Town, South Africa",
     category: "",
     vendor: "Tracey",
-    vendorProfession: "Holistic therapist",
-    vendorProfile:
-        "https://www.perfocal.com/blog/content/images/size/w960/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg",
     latitude: -33.922,
     longitude: 18.4231,
     imageUrls: [
@@ -143,18 +126,13 @@ final List<Place> listOfPlace = [
     isActive: true,
     title: "Bright room in nice apartment bas faron",
     image: "https://www.theindiahotel.com/extra-images/banner-01.jpg",
-    rating: 4.77,
     date: "Oct 10-16",
     price: 34,
     address: "Mumbai, India",
     category: "",
     yearOfHostin: 4,
-    review: 160,
     bedAndBathroom: "1 bed . Shared bathroom",
     vendor: "Ole",
-    vendorProfession: "Consultant",
-    vendorProfile:
-        "https://shotkit.com/wp-content/uploads/bb-plugin/cache/cool-profile-pic-matheus-ferrero-landscape-6cbeea07ce870fc53bedd94909941a4b-zybravgx2q47.jpeg",
     latitude: 19.0760,
     longitude: 72.8777,
     imageUrls: [
@@ -171,18 +149,13 @@ final List<Place> listOfPlace = [
     title: "Connect with your heart to this magical place",
     image:
         "https://lyon.intercontinental.com/wp-content/uploads/sites/6/2019/11/Superior-Room-cEric-Cuvillier-2.jpg",
-    rating: 4.33,
     date: "Dec 17-22",
     price: 76,
     address: "Lyon, France",
     category: "",
     yearOfHostin: 8,
-    review: 236,
     bedAndBathroom: "2 queen beds . Shared bathroom",
     vendor: "Benedicte",
-    vendorProfession: "Teacher",
-    vendorProfile:
-        "https://media.istockphoto.com/id/1300512215/photo/headshot-portrait-of-smiling-ethnic-businessman-in-office.webp?b=1&s=170667a&w=0&k=20&c=TXCiY7rYEvIBd6ibj2bE-VbJu0rRGy3MlHwxt2LHt9w=",
     latitude: 45.7640,
     longitude: 4.8357,
     imageUrls: [
@@ -196,18 +169,13 @@ final List<Place> listOfPlace = [
     isActive: false,
     title: "En-Suite @ Sunrise Beach",
     image: "https://media.timeout.com/images/105162711/image.jpg",
-    rating: 4.90,
     date: "Jan 26-29",
     price: 160,
-    review: 292,
     yearOfHostin: 10,
     bedAndBathroom: "1 double bed . Dedicated bathroom",
     address: "Rome, Italy",
     category: "",
     vendor: "Leva",
-    vendorProfession: "Teacher",
-    vendorProfile:
-        "https://media.istockphoto.com/id/1476171646/photo/young-woman-ready-for-job-business-concept.webp?b=1&s=170667a&w=0&k=20&c=oegktY4Hijr4wOelujTp81I0BJPjD6Q-lb5BpwOj0kA=",
     latitude: 41.8967,
     longitude: 12.4822,
     imageUrls: [

@@ -1,5 +1,4 @@
 import 'package:airbnb/Components/my_icon_button.dart';
-import 'package:airbnb/Components/star_rating.dart';
 
 import 'package:airbnb/components/location_in_map.dart';
 import 'package:airbnb/provider/favorite_provider.dart';
@@ -91,7 +90,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   const Divider(),
                   placePropertyList(
                     size,
-                    widget.place['vendorProfile'],
+                    widget.place['vendor'],
                     "Stay with ${widget.place['vendor']}",
                     "Superhost . ${widget.place['yearOfHostin']} years hosting",
                     textColor,
@@ -292,23 +291,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           children: [
             const Icon(Icons.star),
             const SizedBox(width: 5),
-            Text(
-              "${widget.place['rating'].toString()} . ",
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-            ),
-            Text(
-              "${widget.place['review'].toString()}reviews",
-              style: TextStyle(
-                fontSize: 17,
-                decoration: TextDecoration.underline,
-                fontWeight: FontWeight.w500,
-                color: textColor,
-              ),
-            ),
           ],
         ),
       );
@@ -324,20 +306,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            children: [
-              Text(
-                widget.place['rating'].toString(),
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
-                  color: textColor,
-                ),
-              ),
-              StarRating(rating: widget.place['rating']),
-            ],
-          ),
           Stack(
             children: [
               Image.network(
@@ -356,26 +324,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     height: 1.2,
                     color: Colors.black,
                   ),
-                ),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              Text(
-                widget.place['review'].toString(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                  color: textColor,
-                ),
-              ),
-              const Text(
-                "Reviews",
-                style: TextStyle(
-                  height: 0.7,
-                  color: Colors.black,
-                  decoration: TextDecoration.underline,
                 ),
               ),
             ],

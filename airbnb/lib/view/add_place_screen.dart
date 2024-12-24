@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:airbnb/model/place_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:airbnb/model/place_model.dart';
+import 'package:geolocator/geolocator.dart';
+
 class AddPlaceScreen extends StatefulWidget {
   const AddPlaceScreen({super.key});
 
@@ -11,41 +14,92 @@ class AddPlaceScreen extends StatefulWidget {
 
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _formKey = GlobalKey<FormState>();
-  // Get the user details from Firebase Authentication
   final user = FirebaseAuth.instance.currentUser;
 
   // Controllers for each form field
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _imageController = TextEditingController();
-  final TextEditingController _ratingController = TextEditingController();
+
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _vendorController = TextEditingController();
-  final TextEditingController _vendorProfessionController =
-      TextEditingController();
-  final TextEditingController _vendorProfileController =
-      TextEditingController();
-  final TextEditingController _reviewController = TextEditingController();
+
   final TextEditingController _bedAndBathroomController =
       TextEditingController();
   final TextEditingController _yearOfHostingController =
       TextEditingController();
-  final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _longitudeController = TextEditingController();
 
   bool _isActive = true;
-  String? _selectedCategory; // Selected category
+  String? _selectedCategory;
   List<String> _categories = [];
   bool _isLoadingCategories = true;
+  LatLng? _currentLocation;
+
+  LatLng? _selectedLocation;
 
   @override
   void initState() {
     super.initState();
-    _fetchCategories(); // Fetch categories from Firestore
+    _fetchCategories();
+    _determinePosition();
   }
 
-  // Fetch categories from Firestore
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    try {
+      // Check if location services are enabled
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = LatLng(30.0444, 31.2357); // Default location
+          });
+        }
+        return;
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            setState(() {
+              _currentLocation = LatLng(30.0444, 31.2357); // Default location
+            });
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = LatLng(30.0444, 31.2357); // Default location
+          });
+        }
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _currentLocation = LatLng(position.latitude, position.longitude);
+        });
+      }
+    } catch (e) {
+      // In case of any error, fallback to default location
+      if (mounted) {
+        setState(() {
+          _currentLocation = LatLng(30.0444, 31.2357); // Default location
+        });
+      }
+    }
+  }
+
   Future<void> _fetchCategories() async {
     try {
       final QuerySnapshot querySnapshot =
@@ -66,50 +120,61 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     }
   }
 
-  // Form submit function
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedCategory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a category.')),
+  void _submitForm() async {
+    try {
+      if (_formKey.currentState!.validate()) {
+        if (_selectedCategory == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a category.')),
+          );
+          return;
+        }
+
+        if (_selectedLocation == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Please select a location on the map.')),
+          );
+          return;
+        }
+
+        _formKey.currentState!.save();
+
+        final imageUrls =
+            _imageController.text.split(',').map((url) => url.trim()).toList();
+
+        final place = Place(
+          userid: user!.uid,
+          title: _titleController.text,
+          isActive: _isActive,
+          image: imageUrls.isNotEmpty ? imageUrls.first : "",
+          date: _dateController.text,
+          price: int.parse(_priceController.text),
+          address: _addressController.text,
+          category: _selectedCategory!,
+          vendor: _vendorController.text,
+          bedAndBathroom: _bedAndBathroomController.text,
+          yearOfHostin: int.parse(_yearOfHostingController.text),
+          latitude: _selectedLocation!.latitude,
+          longitude: _selectedLocation!.longitude,
+          imageUrls: imageUrls,
         );
-        return;
+
+        await savePlaceToFirebase(place, context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Place added successfully!')),
+        );
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
       }
-
-      _formKey.currentState!.save();
-
-      // Process image URLs
-      final imageUrls =
-          _imageController.text.split(',').map((url) => url.trim()).toList();
-
-      final place = Place(
-        userid: user!.uid,
-        title: _titleController.text,
-        isActive: _isActive,
-        image: imageUrls.isNotEmpty ? imageUrls.first : "",
-        rating: double.parse(_ratingController.text),
-        date: _dateController.text,
-        price: int.parse(_priceController.text),
-        address: _addressController.text,
-        category: _selectedCategory!,
-        vendor: _vendorController.text,
-        vendorProfession: _vendorProfessionController.text,
-        vendorProfile: _vendorProfileController.text,
-        review: int.parse(_reviewController.text),
-        bedAndBathroom: _bedAndBathroomController.text,
-        yearOfHostin: int.parse(_yearOfHostingController.text),
-        latitude: double.parse(_latitudeController.text),
-        longitude: double.parse(_longitudeController.text),
-        imageUrls: imageUrls,
-      );
-
-      // Save place to Firestore
-      savePlaceToFirebase(place);
-
+    } catch (e) {
+      print("Error submitting form: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Place added successfully!')),
+        SnackBar(content: Text('An error occurred: $e')),
       );
-      Navigator.pop(context);
     }
   }
 
@@ -140,29 +205,52 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 }, theme),
                 _buildTextField(
                     _imageController, "Image URLs (comma-separated)", theme),
-                _buildTextField(_ratingController, "Rating", theme,
-                    isNumeric: true),
                 _buildTextField(_dateController, "Date", theme),
                 _buildTextField(_priceController, "Price", theme,
                     isNumeric: true),
                 _buildTextField(_addressController, "Address", theme),
                 _buildCategoryDropdown(theme),
                 _buildTextField(_vendorController, "Vendor", theme),
-                _buildTextField(
-                    _vendorProfessionController, "Vendor Profession", theme),
-                _buildTextField(
-                    _vendorProfileController, "Vendor Profile URL", theme),
-                _buildTextField(_reviewController, "Review", theme,
-                    isNumeric: true),
                 _buildTextField(_bedAndBathroomController,
                     "Bed and Bathroom Details", theme),
                 _buildTextField(
                     _yearOfHostingController, "Year of Hosting", theme,
                     isNumeric: true),
-                _buildTextField(_latitudeController, "Latitude", theme,
-                    isNumeric: true),
-                _buildTextField(_longitudeController, "Longitude", theme,
-                    isNumeric: true),
+                const SizedBox(height: 16),
+                const Text("Select Location on Map:"),
+                SizedBox(
+                  height: 300,
+                  child: _currentLocation == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target:
+                                _currentLocation!, // Either user's location or default
+                            zoom: 14,
+                          ),
+                          onTap: (LatLng location) {
+                            setState(() {
+                              _selectedLocation = location;
+                            });
+                          },
+                          markers: _selectedLocation != null
+                              ? {
+                                  Marker(
+                                    markerId:
+                                        const MarkerId('selected-location'),
+                                    position: _selectedLocation!,
+                                  ),
+                                }
+                              : {},
+                        ),
+                ),
+                if (_selectedLocation != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      "Selected Location: ${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}",
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitForm,
@@ -187,7 +275,6 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
   }
 
-  // Dropdown for selecting category
   Widget _buildCategoryDropdown(ThemeData theme) {
     if (_isLoadingCategories) {
       return const Padding(

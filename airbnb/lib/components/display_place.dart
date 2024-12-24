@@ -28,9 +28,12 @@ class _DisplayPlaceState extends State<DisplayPlace> {
 
     return StreamBuilder(
       stream: widget.displayCategory.isEmpty
-          ? placeCollection.snapshots() // If no category selected, fetch all places
+          ? placeCollection
+              .snapshots() // If no category selected, fetch all places
           : placeCollection
-              .where("category", isEqualTo: widget.displayCategory) // Filter by category if selected
+              .where("category",
+                  isEqualTo:
+                      widget.displayCategory) // Filter by category if selected
               .snapshots(),
       builder: (context, streamSnapshot) {
         if (streamSnapshot.hasData) {
@@ -162,18 +165,10 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                                 : Colors.amber, // Dynamic star color
                           ),
                           const SizedBox(width: 5),
-                          Text(
-                            place['rating'].toString(),
-                            style: TextStyle(
-                              color: isDarkMode
-                                  ? Colors.white
-                                  : Colors.black, // Dynamic text color
-                            ),
-                          ),
                         ],
                       ),
                       Text(
-                        "Stay with ${place['vendor']} . ${place['vendorProfession']}",
+                        "Stay with ${place['vendor']}",
                         style: TextStyle(
                           color: isDarkMode
                               ? Colors.white70
