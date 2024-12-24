@@ -1,10 +1,11 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key, required this.title});
-  final String title;
+  const MessagesScreen({super.key});
 
   @override
   State<MessagesScreen> createState() => _MyMessagesScreen();
@@ -12,6 +13,7 @@ class MessagesScreen extends StatefulWidget {
 
 class _MyMessagesScreen extends State<MessagesScreen> {
   final TextEditingController _userInput = TextEditingController();
+  bool _canSendMessage = false;
 
   static const apiKey = "AIzaSyAA0mXY7QvNjjmku7OuAiMBTeRxpy0wS0s";
 
@@ -32,6 +34,18 @@ class _MyMessagesScreen extends State<MessagesScreen> {
     setState(() {
       _messages.add(Message(isUser: false, message: response.text ?? "", date: DateTime.now()));
       _userInput.text = "";
+      _canSendMessage = false; // Disable the button after sending
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to the text field input to toggle the "Send" button
+    _userInput.addListener(() {
+      setState(() {
+        _canSendMessage = _userInput.text.trim().isNotEmpty;
+      });
     });
   }
 
@@ -44,9 +58,7 @@ class _MyMessagesScreen extends State<MessagesScreen> {
           onPressed: () {
             Navigator.pop(context); // This will navigate back
           },
-        ),
-        title: Text("Chat with our bot"),
-        backgroundColor: Colors.green, // Set the navbar color to green
+        ), 
       ),
       body: Container(
         child: Column(
@@ -69,26 +81,28 @@ class _MyMessagesScreen extends State<MessagesScreen> {
                       style: TextStyle(color: Colors.black),
                       controller: _userInput,
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          label: Text('Enter Your Message')),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        label: Text('Enter Your Message'),
+                      ),
                     ),
                   ),
                   Spacer(),
-                  IconButton(
-                    padding: EdgeInsets.all(12),
-                    iconSize: 30,
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.black),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
-                      shape: WidgetStateProperty.all(CircleBorder())
+                  if (_canSendMessage)
+                    IconButton(
+                      padding: EdgeInsets.all(12),
+                      iconSize: 30,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.black),
+                        foregroundColor: WidgetStateProperty.all(Colors.white),
+                        shape: WidgetStateProperty.all(CircleBorder()),
+                      ),
+                      onPressed: () {
+                        sendMessage();
+                      },
+                      icon: Icon(Icons.send),
                     ),
-                    onPressed: () {
-                      sendMessage();
-                    },
-                    icon: Icon(Icons.send),
-                  ),
                 ],
               ),
             ),
