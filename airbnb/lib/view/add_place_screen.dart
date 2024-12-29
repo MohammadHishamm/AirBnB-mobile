@@ -122,6 +122,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
   void _submitForm() async {
     try {
+      // Validate the form.
       if (_formKey.currentState!.validate()) {
         if (_selectedCategory == null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -138,11 +139,17 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           return;
         }
 
+        // Save the form state.
         _formKey.currentState!.save();
 
-        final imageUrls =
-            _imageController.text.split(',').map((url) => url.trim()).toList();
+        // Extract and clean the image URLs.
+        final imageUrls = _imageController.text
+            .split(',')
+            .map((url) => url.trim())
+            .where((url) => url.isNotEmpty)
+            .toList();
 
+        // Create the place object.
         final place = Place(
           userid: user!.uid,
           title: _titleController.text,
@@ -160,21 +167,43 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           imageUrls: imageUrls,
         );
 
-        await savePlaceToFirebase(place, context);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Place added successfully!')),
+        // Show a loading indicator.
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          },
         );
 
+        // Save the place to Firebase.
+        try {
+          // Perform Firebase operation
+          await savePlaceToFirebase(place);
+        } finally {
+          // Ensure the dialog is dismissed regardless of success/failure
+          if (mounted) Navigator.of(context).pop();
+        }
+
+        // Show success message
         if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Place added successfully!')),
+          );
           Navigator.pop(context);
         }
       }
     } catch (e) {
+      // Error Handling
       print("Error submitting form: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
-      );
+      if (mounted) {
+        Navigator.of(context).pop(); // Dismiss dialog if an error occurs
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
+      }
     }
   }
 

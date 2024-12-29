@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:airbnb/Components/my_icon_button.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,7 +18,7 @@ class MapWithCustomInfoWindows extends StatefulWidget {
 class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
   LatLng myCurrentLocation = const LatLng(27.7172, 85.3240);
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
-  late GoogleMapController googleMapController;
+  GoogleMapController? googleMapController;
 
   final CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
@@ -31,38 +33,49 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
     _loadMarkers();
   }
 
+  StreamSubscription? _markerSubscription;
   // for custom maker
   Future<void> _loadMarkers() async {
-    customIcon = await BitmapDescriptor.asset(
-      const ImageConfiguration(),
-      "assets/images/marker.png",
-      height: 40,
-      width: 30,
-    );
-    Size size = MediaQuery.of(context).size;
+    try {
+      customIcon = await BitmapDescriptor.asset(
+        const ImageConfiguration(),
+        "assets/images/marker.png",
+        height: 40,
+        width: 30,
+      );
 
-    placeCollection.snapshots().listen((QuerySnapshot streamSnapshot) {
-      if (streamSnapshot.docs.isNotEmpty) {
-        final List allMarkers = streamSnapshot.docs;
-        List<Marker> myMarker = [];
-        for (final marker in allMarkers) {
+      Size size = MediaQuery.of(context).size;
+
+      // Store the subscription
+      _markerSubscription =
+          placeCollection.snapshots().listen((QuerySnapshot streamSnapshot) {
+        if (!mounted) return; // Exit if widget is disposed
+
+        final List<Marker> myMarker = [];
+
+        for (final marker in streamSnapshot.docs) {
           final dat = marker.data();
-          final data = (dat) as Map;
-          myMarker.add(
-            Marker(
-                markerId: MarkerId(
-                  data['address'],
-                ),
-                position: LatLng(
-                  data['latitude'],
-                  data['longitude'],
-                ),
+          if (dat is Map) {
+            final String address = dat['address'] ?? 'Unknown Address';
+            final double latitude =
+                (dat['latitude'] as num?)?.toDouble() ?? 0.0;
+            final double longitude =
+                (dat['longitude'] as num?)?.toDouble() ?? 0.0;
+            final List imageUrls = dat['imageUrls'] ?? [];
+            final String date = dat['date'] ?? 'Unknown Date';
+            final double price = (dat['price'] as num?)?.toDouble() ?? 0.0;
+
+            if (latitude == 0.0 && longitude == 0.0) continue;
+
+            myMarker.add(
+              Marker(
+                markerId: MarkerId(address),
+                position: LatLng(latitude, longitude),
                 onTap: () {
                   _customInfoWindowController.addInfoWindow!(
                     Container(
                       height: size.height * 0.32,
                       width: size.width * 0.8,
-                      // let's desing the custom infor windows
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
@@ -78,14 +91,18 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                     topLeft: Radius.circular(25),
                                     topRight: Radius.circular(25),
                                   ),
-                                  child: AnotherCarousel(
-                                    images: data['imageUrls']
-                                        .map((url) => NetworkImage(url))
-                                        .toList(),
-                                    dotSize: 5,
-                                    indicatorBgPadding: 5,
-                                    dotBgColor: Colors.transparent,
-                                  ),
+                                  child: imageUrls.isNotEmpty
+                                      ? AnotherCarousel(
+                                          images: imageUrls
+                                              .map((url) => NetworkImage(url))
+                                              .toList(),
+                                          dotSize: 5,
+                                          indicatorBgPadding: 5,
+                                          dotBgColor: Colors.transparent,
+                                        )
+                                      : const Center(
+                                          child: Text('No Images Available'),
+                                        ),
                                 ),
                               ),
                               Positioned(
@@ -123,7 +140,7 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                 Row(
                                   children: [
                                     Text(
-                                      data["address"],
+                                      address,
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -141,7 +158,7 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                   ),
                                 ),
                                 Text(
-                                  data['date'],
+                                  date,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     color: Colors.black54,
@@ -149,14 +166,14 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                 ),
                                 Text.rich(
                                   TextSpan(
-                                    text: '\$${data['price']}',
+                                    text: '\$$price',
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     children: const [
                                       TextSpan(
-                                        text: "night",
+                                        text: " / night",
                                         style: TextStyle(
                                           fontWeight: FontWeight.normal,
                                         ),
@@ -169,21 +186,37 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                           ),
                         ],
                       ),
-                    ), // error due to  spelling mistake
-                    LatLng(
-                      data['latitude'],
-                      data['longitude'],
                     ),
+                    LatLng(latitude, longitude),
                   );
                 },
-                icon: customIcon),
-          );
+                icon: customIcon,
+              ),
+            );
+          }
         }
-        setState(() {
-          markers = myMarker;
-        });
-      }
-    });
+
+        if (mounted) {
+          setState(() {
+            markers = myMarker;
+          });
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading markers: $e');
+    }
+  }
+
+  @override
+  @override
+  void dispose() {
+    _markerSubscription?.cancel();
+    _customInfoWindowController.dispose();
+
+    // Only dispose if googleMapController is not null
+    googleMapController?.dispose();
+
+    super.dispose();
   }
 
   @override

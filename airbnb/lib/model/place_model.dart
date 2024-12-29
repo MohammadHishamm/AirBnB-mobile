@@ -1,24 +1,22 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
-Future<void> savePlaceToFirebase(Place place, BuildContext context) async {
-  final CollectionReference ref =
-      FirebaseFirestore.instance.collection("myAppCollection");
-
-  final String id =
-      DateTime.now().toIso8601String() + Random().nextInt(1000).toString();
-
+Future<void> savePlaceToFirebase(Place place) async {
   try {
+    final CollectionReference ref =
+        FirebaseFirestore.instance.collection("myAppCollection");
+
+    final String id =
+        DateTime.now().toIso8601String() + Random().nextInt(1000).toString();
+
     // Save the individual place object to Firebase
     await ref.doc(id).set(place.toMap());
-    print("Place saved successfully: $id");
+
+    print("Place successfully added to Firebase with ID: $id");
   } catch (e) {
-    print("Error saving place: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Failed to save place: $e")),
-    );
+    print("Error saving place to Firebase: $e");
+    throw Exception('Failed to save place: $e');
   }
 }
 

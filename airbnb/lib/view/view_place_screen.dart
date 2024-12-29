@@ -45,29 +45,35 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
       });
 
       // Delete the place from the main collection
-      await FirebaseFirestore.instance.collection('myAppCollection').doc(placeId).delete();
+      await FirebaseFirestore.instance
+          .collection('myAppCollection')
+          .doc(placeId)
+          .delete();
 
-      // Access the userFavorites collection to delete the place from all users' favorites
-      final userFavoritesSnapshot = await FirebaseFirestore.instance.collection('userFavorites').get();
+      // Get the current user UID
+      String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-for (var userDoc in userFavoritesSnapshot.docs) {
-  // Access the favorites subcollection for each user
-  final favoritesSnapshot = await FirebaseFirestore.instance
-      .collection('userFavorites')
-      .doc(userDoc.id) // Ensure userDoc.id is valid
-      .collection('favorites')
-      .where(FieldPath.documentId, isEqualTo: placeId) // Ensure placeId is valid
-      .get();
+      if (currentUserId.isEmpty) {
+        print("No user is logged in.");
+        return;
+      }
 
-  for (var favoriteDoc in favoritesSnapshot.docs) {
-    await FirebaseFirestore.instance
-        .collection('userFavorites')
-        .doc(userDoc.id)
-        .collection('favorites')
-        .doc(favoriteDoc.id)
-        .delete();
-  }
-}
+      // Access the current user's favorites subcollection to delete the place
+      final favoritesDocRef = FirebaseFirestore.instance
+          .collection('userFavorites')
+          .doc(currentUserId) // Reference the current user's document
+          .collection('favorites')
+          .doc(placeId); // Reference the favorite by placeId directly
+
+      // Check if the document exists
+      final favoritesSnapshot = await favoritesDocRef.get();
+      if (favoritesSnapshot.exists) {
+        // If it exists, delete it
+        await favoritesDocRef.delete();
+        print('Deleted $placeId from user $currentUserId favorites.');
+      } else {
+        print('Place $placeId not found in user $currentUserId favorites.');
+      }
     } catch (e) {
       print('Error deleting place: $e');
     }
@@ -116,21 +122,24 @@ for (var userDoc in userFavoritesSnapshot.docs) {
                               color: Colors.red,
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.only(right: 20),
-                              child: const Icon(Icons.delete, color: Colors.white),
+                              child:
+                                  const Icon(Icons.delete, color: Colors.white),
                             ),
                             child: GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => PlaceDetailScreen(place: place),
+                                    builder: (_) =>
+                                        PlaceDetailScreen(place: place),
                                   ),
                                 );
                               },
                               child: Card(
                                 elevation: 3,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15), // Match the card's radius
+                                  borderRadius: BorderRadius.circular(
+                                      15), // Match the card's radius
                                 ),
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 child: Padding(
@@ -138,7 +147,8 @@ for (var userDoc in userFavoritesSnapshot.docs) {
                                   child: Row(
                                     children: [
                                       Image.network(
-                                        place['image'], // Image URL from Firestore
+                                        place[
+                                            'image'], // Image URL from Firestore
                                         height: 100,
                                         width: 100,
                                         fit: BoxFit.cover,
@@ -146,10 +156,12 @@ for (var userDoc in userFavoritesSnapshot.docs) {
                                       const SizedBox(width: 15),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              place['title'], // Title from Firestore
+                                              place[
+                                                  'title'], // Title from Firestore
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 18,
@@ -175,13 +187,18 @@ for (var userDoc in userFavoritesSnapshot.docs) {
                                             const SizedBox(height: 5),
                                             Row(
                                               children: [
-                                                const Icon(Icons.location_on, size: 16, color: Colors.redAccent),
+                                                const Icon(Icons.location_on,
+                                                    size: 16,
+                                                    color: Colors.redAccent),
                                                 const SizedBox(width: 5),
                                                 Expanded(
                                                   child: Text(
-                                                    place['address'] ?? 'Unknown location',
-                                                    style: const TextStyle(fontSize: 14),
-                                                    overflow: TextOverflow.ellipsis,
+                                                    place['address'] ??
+                                                        'Unknown location',
+                                                    style: const TextStyle(
+                                                        fontSize: 14),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                               ],
@@ -193,7 +210,8 @@ for (var userDoc in userFavoritesSnapshot.docs) {
                                       // Drag handle icon
                                       Icon(
                                         Icons.drag_handle_rounded,
-                                        color: const Color.fromARGB(255, 0, 0, 0),
+                                        color:
+                                            const Color.fromARGB(255, 0, 0, 0),
                                       ),
                                     ],
                                   ),
