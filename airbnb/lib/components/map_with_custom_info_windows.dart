@@ -95,28 +95,7 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 5,
-                                        horizontal: 12,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      child: const Text(
-                                        "Guest Favorite",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
                                     const Spacer(),
-                                    const MyIconButton(
-                                      icon: Icons.favorite_border,
-                                      radius: 15,
-                                    ),
                                     const SizedBox(width: 13),
                                     InkWell(
                                       onTap: () {
@@ -151,9 +130,7 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                       ),
                                     ),
                                     const Spacer(),
-                                    const Icon(Icons.star),
                                     const SizedBox(width: 5),
-                                    Text(data['rating'].toString()),
                                   ],
                                 ),
                                 const Text(
