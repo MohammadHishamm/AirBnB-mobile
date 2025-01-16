@@ -24,6 +24,8 @@ dependencies:
   google_generative_ai: ^0.4.6
   geolocator: ^13.0.2
   shared_preferences: ^2.3.4
+  flutter_paypal_payment: ^1.0.7
+  flutter_dotenv: ^5.0.2 
 
 dev_dependencies:
   flutter_test:

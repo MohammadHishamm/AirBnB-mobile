@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:airbnb/provider/Theme_provider.dart';
-
+import 'package:airbnb/view/PaymentScreen.dart';
 class PlaceDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> place;
   const PlaceDetailScreen({super.key, required this.place});
@@ -167,65 +167,78 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     );
   }
 
-  Container priceAndReserve(
-      Size size, Color textColor, ThemeProvider themeProvider) {
-    return Container(
-      height: size.height * 0.1,
-      decoration: BoxDecoration(
-        color: themeProvider.isDarkMode
-            ? Colors.black
-            : Colors.white, // Dynamic background color based on the theme
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              RichText(
-                text: TextSpan(
-                  text: "\$${widget.place['price']} ",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                    fontSize: 18,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: "night",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: textColor,
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                widget.place['date'],
+Container priceAndReserve(
+    Size size, Color textColor, ThemeProvider themeProvider) {
+  return Container(
+    height: size.height * 0.1,
+    decoration: BoxDecoration(
+      color: themeProvider.isDarkMode
+          ? Colors.black
+          : Colors.white,
+      border: Border.all(color: Colors.black12),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RichText(
+              text: TextSpan(
+                text: "\$${widget.place['price']} ",
                 style: TextStyle(
-                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
                   color: textColor,
+                  fontSize: 18,
                 ),
-              )
-            ],
-          ),
-          SizedBox(
-            width: size.width * 0.3,
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 35,
-              vertical: 15,
+                children: [
+                  TextSpan(
+                    text: "night",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: textColor,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            decoration: BoxDecoration(
-              color: Colors.pink,
-              borderRadius: BorderRadius.circular(15),
+            Text(
+              widget.place['date'],
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+                color: textColor,
+              ),
             ),
+          ],
+        ),
+        SizedBox(
+          width: size.width * 0.3,
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 35,
+            vertical: 15,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.pink,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: GestureDetector(
+            onTap: () {
+              // Navigate to the PaymentScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentScreen(
+                    price: widget.place['price'],
+                    title: widget.place['title'],
+                  ),
+                ),
+              );
+            },
             child: const Text(
               "Reserve",
               style: TextStyle(
@@ -235,10 +248,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Padding placePropertyList(
       Size size, image, title, subtitle, Color textColor) {
