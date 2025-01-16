@@ -55,6 +55,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Category deleted'),
+          duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: 'Undo',
             onPressed: restoreDeletedCategory,
