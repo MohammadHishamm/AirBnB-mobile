@@ -1,9 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseAuthServices {
   final auth = FirebaseAuth.instance;
   final googleSignIn = GoogleSignIn(); // No clientId needed for emulator/mobile
+
+  // Define default user type
+  static const String defaultUserType = 'customer';
 
   Future<void> signInWithGoogle() async {
     try {
@@ -25,6 +29,9 @@ class FirebaseAuthServices {
         UserCredential userCredential =
             await auth.signInWithCredential(authCredential);
         print('Signed in user: ${userCredential.user?.email}');
+
+        // Check if the user exists and set their user type
+        await _checkAndSetUserType(userCredential.user!);
       } else {
         print('Google sign-in was canceled by the user.');
       }
@@ -43,6 +50,49 @@ class FirebaseAuthServices {
       print('User successfully signed out.');
     } catch (e) {
       print('Error signing out: $e');
+    }
+  }
+
+  Future<void> _checkAndSetUserType(User user) async {
+    try {
+      // Get the user document from Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        // If user exists, we don't need to set the user type again
+        String userType = userDoc['userType'];
+        print('User type is: $userType');
+      } else {
+        // If user doesn't exist, create a new user document and assign them the default type 'customer'
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'userType': defaultUserType, // Set user type as 'customer' by default
+        });
+        print('New user created with default user type: $defaultUserType');
+      }
+    } catch (e) {
+      print('Error checking and setting user type: $e');
+    }
+  }
+
+  // You can use this method to retrieve the user type if needed
+  Future<String?> getUserType(String userId) async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        return userDoc['userType'];
+      }
+      return null;
+    } catch (e) {
+      print('Error getting user type: $e');
+      return null;
     }
   }
 }

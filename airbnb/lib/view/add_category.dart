@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
-import 'package:airbnb/model/category.dart';
+import 'package:airbnb/model/category_model.dart';
 
 class AddCategoryPage extends StatefulWidget {
   @override
