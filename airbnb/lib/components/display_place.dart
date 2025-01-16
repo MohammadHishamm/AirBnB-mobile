@@ -4,6 +4,7 @@ import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'adaptive_image.dart';
 
 class DisplayPlace extends StatefulWidget {
   final String displayCategory; // Add this field to store the selected category
@@ -67,25 +68,12 @@ class _DisplayPlaceState extends State<DisplayPlace> {
                               height: 375,
                               width: double.infinity,
                               child: AnotherCarousel(
-                                images: place['imageUrls'].map((url) {
-                                  return CachedNetworkImage(
-                                    imageUrl: url,
-                                    placeholder: (context, url) =>
-                                        Transform.scale(
-                                      scale: 0.3, // Scale the loading indicator
-                                      child: const CircularProgressIndicator(
-                                        strokeWidth: 1,
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) {
-                                      print(
-                                          'Failed to load image: $url, error: $error');
-                                      return const Icon(Icons
-                                          .error); // Placeholder error icon
-                                    },
-                                    fit: BoxFit.cover,
-                                  );
-                                }).toList(),
+                                images: List<Widget>.from(
+                                  place['imageUrls'].map((url) => AdaptiveImage(
+                                        imageSource: url,
+                                        fit: BoxFit.cover,
+                                      )),
+                                ),
                                 dotSize: 6,
                                 indicatorBgPadding: 5,
                                 dotBgColor: Colors.transparent,

@@ -1,4 +1,5 @@
 import 'package:airbnb/Components/my_icon_button.dart';
+import 'package:airbnb/components/adaptive_image.dart';
 
 import 'package:airbnb/components/location_in_map.dart';
 import 'package:airbnb/provider/favorite_provider.dart';
@@ -354,7 +355,10 @@ Container priceAndReserve(
           height: size.height * 0.35,
           child: AnotherCarousel(
             images: widget.place['imageUrls']
-                .map((url) => NetworkImage(url))
+                .map<Widget>((url) => AdaptiveImage(
+                      imageSource: url,
+                      fit: BoxFit.cover,
+                    ))
                 .toList(),
             showIndicator: false,
             dotBgColor: Colors.transparent,

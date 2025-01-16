@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:airbnb/Components/my_icon_button.dart';
+import 'package:airbnb/components/adaptive_image.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_info_window/custom_info_window.dart';
@@ -93,10 +94,14 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                   ),
                                   child: imageUrls.isNotEmpty
                                       ? AnotherCarousel(
-                                          images: imageUrls
-                                              .map((url) => NetworkImage(url))
-                                              .toList(),
-                                          dotSize: 5,
+                                          images: List<Widget>.from(
+                                            imageUrls
+                                                .map((url) => AdaptiveImage(
+                                                      imageSource: url,
+                                                      fit: BoxFit.cover,
+                                                    )),
+                                          ),
+                                          dotSize: 6,
                                           indicatorBgPadding: 5,
                                           dotBgColor: Colors.transparent,
                                         )
