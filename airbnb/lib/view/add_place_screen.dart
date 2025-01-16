@@ -4,6 +4,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb/model/place_model.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 class AddPlaceScreen extends StatefulWidget {
   const AddPlaceScreen({super.key});
@@ -15,6 +19,12 @@ class AddPlaceScreen extends StatefulWidget {
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _formKey = GlobalKey<FormState>();
   final user = FirebaseAuth.instance.currentUser;
+  final ImagePicker _picker = ImagePicker();
+
+  // List to store base64 encoded images
+  List<String> _base64Images = [];
+  // List to store image files for preview
+  List<File> _imageFiles = [];
 
   // Controllers for each form field
   final TextEditingController _titleController = TextEditingController();
@@ -120,9 +130,144 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      // Create a temporary file to store the image
+      final Directory tempDir = await getTemporaryDirectory();
+      final String tempPath = tempDir.path;
+      final String uniqueFileName =
+          DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
+      final String filePath = '$tempPath/$uniqueFileName';
+
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        // Copy the image to our temporary file
+        final File imageFile = File(image.path);
+        final File savedImage = await imageFile.copy(filePath);
+
+        // Read bytes from the saved file
+        final bytes = await savedImage.readAsBytes();
+        // Convert to base64
+        final base64Image = base64Encode(bytes);
+
+        setState(() {
+          _imageFiles.add(savedImage);
+          _base64Images.add(base64Image);
+        });
+
+        // Clean up the original image file if it's different from our saved copy
+        if (imageFile.path != savedImage.path) {
+          await imageFile
+              .delete()
+              .catchError((e) => print('Error deleting original file: $e'));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+      print('Error picking image: $e');
+    }
+  }
+
+  void _showImagePickerDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Image Source'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Gallery'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Camera'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImageGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: _imageFiles.length + 1, // +1 for the add button
+      itemBuilder: (context, index) {
+        if (index == _imageFiles.length) {
+          // Add button
+          return InkWell(
+            onTap: _showImagePickerDialog,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.add_photo_alternate, size: 40),
+            ),
+          );
+        }
+        // Image preview
+        return Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                _imageFiles[index],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _imageFiles.removeAt(index);
+                    _base64Images.removeAt(index);
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _submitForm() async {
     try {
-      // Validate the form.
       if (_formKey.currentState!.validate()) {
         if (_selectedCategory == null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -139,22 +284,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           return;
         }
 
-        // Save the form state.
+        if (_base64Images.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please add at least one image.')),
+          );
+          return;
+        }
+
         _formKey.currentState!.save();
 
-        // Extract and clean the image URLs.
-        final imageUrls = _imageController.text
-            .split(',')
-            .map((url) => url.trim())
-            .where((url) => url.isNotEmpty)
-            .toList();
-
-        // Create the place object.
         final place = Place(
           userid: user!.uid,
           title: _titleController.text,
           isActive: _isActive,
-          image: imageUrls.isNotEmpty ? imageUrls.first : "",
+          image: _base64Images.first, // First image as main image
           date: _dateController.text,
           price: int.parse(_priceController.text),
           address: _addressController.text,
@@ -164,30 +307,22 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           yearOfHostin: int.parse(_yearOfHostingController.text),
           latitude: _selectedLocation!.latitude,
           longitude: _selectedLocation!.longitude,
-          imageUrls: imageUrls,
+          imageUrls: _base64Images, // All images as base64 strings
         );
 
-        // Show a loading indicator.
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
+          builder: (context) =>
+              const Center(child: CircularProgressIndicator()),
         );
 
-        // Save the place to Firebase.
         try {
-          // Perform Firebase operation
           await savePlaceToFirebase(place);
         } finally {
-          // Ensure the dialog is dismissed regardless of success/failure
           if (mounted) Navigator.of(context).pop();
         }
 
-        // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Place added successfully!')),
@@ -196,15 +331,33 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         }
       }
     } catch (e) {
-      // Error Handling
       print("Error submitting form: $e");
       if (mounted) {
-        Navigator.of(context).pop(); // Dismiss dialog if an error occurs
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('An error occurred: $e')),
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up temporary files
+    for (final file in _imageFiles) {
+      file.delete().catchError((e) => print('Error deleting file: $e'));
+    }
+
+    // Dispose of all controllers
+    _titleController.dispose();
+    _dateController.dispose();
+    _priceController.dispose();
+    _addressController.dispose();
+    _vendorController.dispose();
+    _bedAndBathroomController.dispose();
+    _yearOfHostingController.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -232,8 +385,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     _isActive = value;
                   });
                 }, theme),
-                _buildTextField(
-                    _imageController, "Image URLs (comma-separated)", theme),
+                const SizedBox(height: 16),
+                const Text("Add Images:"),
+                const SizedBox(height: 8),
+                _buildImageGrid(),
                 _buildTextField(_dateController, "Date", theme),
                 _buildTextField(_priceController, "Price", theme,
                     isNumeric: true),
@@ -253,8 +408,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : GoogleMap(
                           initialCameraPosition: CameraPosition(
-                            target:
-                                _currentLocation!, // Either user's location or default
+                            target: _currentLocation!,
                             zoom: 14,
                           ),
                           onTap: (LatLng location) {

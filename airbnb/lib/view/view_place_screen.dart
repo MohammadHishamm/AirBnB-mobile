@@ -1,3 +1,4 @@
+import 'package:airbnb/components/adaptive_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -146,13 +147,14 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
                                   padding: const EdgeInsets.all(15),
                                   child: Row(
                                     children: [
-                                      Image.network(
-                                        place[
+                                      AdaptiveImage(
+                                        imageSource: place[
                                             'image'], // Image URL from Firestore
                                         height: 100,
                                         width: 100,
                                         fit: BoxFit.cover,
                                       ),
+
                                       const SizedBox(width: 15),
                                       Expanded(
                                         child: Column(

@@ -24,6 +24,8 @@ dependencies:
   google_generative_ai: ^0.4.6
   geolocator: ^13.0.2
   shared_preferences: ^2.3.4
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

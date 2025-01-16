@@ -1,3 +1,4 @@
+import 'package:airbnb/components/adaptive_image.dart';
 import 'package:airbnb/provider/favorite_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -116,14 +117,18 @@ class _WishlistsState extends State<Wishlists> {
                                           decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(15),
-                                            image: DecorationImage(
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            child: AdaptiveImage(
+                                              imageSource:
+                                                  favoriteItem['image'],
                                               fit: BoxFit.cover,
-                                              image: NetworkImage(
-                                                favoriteItem['image'],
-                                              ),
                                             ),
                                           ),
                                         ),
+
                                         // favorite icon in the top right corner
                                         const Positioned(
                                           top: 8,
