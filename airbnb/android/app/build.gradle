@@ -25,6 +25,10 @@ if (flutterVersionName == null) {
 }
 ext {
     mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
+    clientkey=localProperties.getProperty("PAYPAL_CLIENT_ID")?: ""
+    secretkey=localProperties.getProperty("PAYPAL_SECRET_KE")?: ""
+
+
 }
 android {
     namespace = "com.example.airbnb"
@@ -54,6 +58,8 @@ android {
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
         resValue "string", "MAPS_API_KEY", mapsApiKey ?: ""
+        resValue "string", "PAYPAL_CLIENT_ID", clientkey ?: ""
+        resValue "string", "PAYPAL_SECRET_KEY", secretkey ?: ""
     }
 
     buildTypes {

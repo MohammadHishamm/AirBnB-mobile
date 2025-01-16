@@ -231,9 +231,6 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       onPressed: () {
-        // now, what we need is=> if we clik on map icon open the bottomsheet and show the goofle map,
-        // i have already setup the project for google map, api key, and developer account,
-        // if you don't have knwledge about that then visit my goome map playlist, i have cover it from zero level
         showModalBottomSheet(
             clipBehavior: Clip.none,
             isScrollControlled: true,

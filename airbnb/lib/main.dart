@@ -6,11 +6,10 @@ import 'package:airbnb/view/Login_screen.dart';
 import 'package:airbnb/view/main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-   await dotenv.load(); // Load the environment variables
+  // Load the environment variables
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: "AIzaSyCGgQ3zjP46P_Bhb1y-WPzQpDvtLY_oPA0",
