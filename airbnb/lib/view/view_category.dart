@@ -14,25 +14,86 @@ class _CategoriesPageState extends State<CategoriesPage> {
   final CollectionReference placesRef =
       FirebaseFirestore.instance.collection("myAppCollection");
 
+  // Temporary storage for the last deleted category
+  Map<String, dynamic>? recentlyDeletedCategory;
+  String? recentlyDeletedCategoryId;
+
   Future<void> deleteCategory(String categoryId, String categoryTitle) async {
     try {
-      // Delete places associated with the category
+      // Fetch and store places associated with the category
       final QuerySnapshot placesSnapshot =
           await placesRef.where('category', isEqualTo: categoryTitle).get();
-
+      List<Map<String, dynamic>> associatedPlaces = [];
       for (var doc in placesSnapshot.docs) {
-        await doc.reference.delete();
+        associatedPlaces.add({
+          'id': doc.id,
+          'data': doc.data(),
+        });
+      }
+
+      // Store the deleted category and its associated places temporarily
+      recentlyDeletedCategory = {
+        'id': categoryId,
+        'title': categoryTitle,
+        'image': await categoriesRef
+            .doc(categoryId)
+            .get()
+            .then((doc) => doc['image']),
+        'associatedPlaces': associatedPlaces,
+      };
+      recentlyDeletedCategoryId = categoryId;
+
+      // Delete places associated with the category
+      for (var place in associatedPlaces) {
+        await placesRef.doc(place['id']).delete();
       }
 
       // Delete the category
       await categoriesRef.doc(categoryId).delete();
+
+      // Show a SnackBar with Undo option
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Category and associated places deleted.')),
+        SnackBar(
+          content: Text('Category deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: restoreDeletedCategory,
+          ),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error deleting category: $e')),
       );
+    }
+  }
+
+  Future<void> restoreDeletedCategory() async {
+    if (recentlyDeletedCategory != null) {
+      try {
+        // Restore the category
+        await categoriesRef.doc(recentlyDeletedCategoryId).set({
+          'title': recentlyDeletedCategory!['title'],
+          'image': recentlyDeletedCategory!['image'],
+        });
+
+        // Restore associated places
+        for (var place in recentlyDeletedCategory!['associatedPlaces']) {
+          await placesRef.doc(place['id']).set(place['data']);
+        }
+
+        // Clear the temporary storage
+        recentlyDeletedCategory = null;
+        recentlyDeletedCategoryId = null;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Category restored successfully!')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error restoring category: $e')),
+        );
+      }
     }
   }
 
