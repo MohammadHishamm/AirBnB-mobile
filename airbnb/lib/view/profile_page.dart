@@ -204,7 +204,7 @@ class ProfilePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const DisplayUserPlaces()),
+                          builder: (context) => const PlacesPage()),
                     );
                   },
                   child: profileInfo(
