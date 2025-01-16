@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 
 class PaymentScreen extends StatelessWidget {
-  final double price;
+  final int price;
   final String title;
 
   const PaymentScreen({super.key, required this.price, required this.title});
