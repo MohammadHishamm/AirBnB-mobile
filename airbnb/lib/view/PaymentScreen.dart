@@ -22,8 +22,10 @@ class PaymentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (BuildContext context) => PaypalCheckoutView(
                   sandboxMode: true,
-                  clientId: "", // Replace with your PayPal Client ID
-                  secretKey: "", // Replace with your PayPal Secret Key
+                  clientId:
+                      "ARCsRnuVt4CJ0StI_0SQ0DIB-caYKiaxdgqq43wrnkj05ykLc43jEL3yeoCV3SdM5n1oyhsTqwxUDi6P", // Replace with your PayPal Client ID
+                  secretKey:
+                      "EFjbW5YajLaTTBT-e-hUhzLopF-FiEuCX8bHuSousbIWBnmx00AcxE1ZIG3zlmy33euAJQxb4XemDnZh", // Replace with your PayPal Secret Key
                   transactions: [
                     {
                       "amount": {

@@ -30,7 +30,6 @@ class FirebaseAuthServices {
             await auth.signInWithCredential(authCredential);
         print('Signed in user: ${userCredential.user?.email}');
 
-        // Check if the user exists and set their user type
         await _checkAndSetUserType(userCredential.user!);
       } else {
         print('Google sign-in was canceled by the user.');

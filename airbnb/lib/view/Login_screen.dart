@@ -141,17 +141,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         print('Attempting to sign in...');
                         await FirebaseAuthServices().signInWithGoogle();
 
-                        User? currentUser = FirebaseAuth.instance.currentUser;
-                        if (currentUser != null) {
-                          print('User signed in: ${currentUser.email}');
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AppMainScreen(),
-                            ),
-                          );
-                        } else {
-                          print('User is not signed in.');
+                        try {
+                          final currentUser = FirebaseAuth.instance.currentUser;
+
+                          if (currentUser != null) {
+                            print('User signed in: ${currentUser.email}');
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AppMainScreen(),
+                              ),
+                            );
+                          } else {
+                            print('No user signed in');
+                            // Handle the case where no user is signed in
+                          }
+                        } catch (e) {
+                          print('Error during sign-in process: $e');
                         }
                       },
                       child: socialIcons(

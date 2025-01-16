@@ -1,29 +1,64 @@
-import 'package:flutter/material.dart';
+import 'package:airbnb/components/adaptive_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:airbnb/view/place_details_screen.dart';
 
-class PlacesPage extends StatefulWidget {
-  const PlacesPage({Key? key}) : super(key: key);
+class DisplayUserPlaces extends StatefulWidget {
+  const DisplayUserPlaces({super.key});
 
   @override
-  State<PlacesPage> createState() => _PlacesPageState();
+  State<DisplayUserPlaces> createState() => _DisplayUserPlacesState();
 }
 
-class _PlacesPageState extends State<PlacesPage> {
-  final CollectionReference placesRef =
-      FirebaseFirestore.instance.collection("myAppCollection");
-
-  // Temporary storage for the last deleted place
+class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
+  List<DocumentSnapshot> userPlaces = [];
   Map<String, dynamic>? recentlyDeletedPlace;
   String? recentlyDeletedPlaceId;
 
-  Future<void> deletePlace(String placeId, Map<String, dynamic> placeData) async {
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPlaces();
+  }
+
+  Future<void> _loadUserPlaces() async {
     try {
-      // Store the deleted place temporarily
-      recentlyDeletedPlace = placeData;
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('myAppCollection')
+            .where('userid', isEqualTo: currentUser.uid)
+            .get();
+
+        setState(() {
+          userPlaces = querySnapshot.docs;
+        });
+      }
+    } catch (e) {
+      print('Error loading user places: $e');
+    }
+  }
+
+  void _deletePlace(int index, String placeId) async {
+    try {
+      // Temporarily store the deleted place data
+      recentlyDeletedPlace = {
+        'id': placeId,
+        'data': userPlaces[index].data(),
+      };
       recentlyDeletedPlaceId = placeId;
 
-      // Delete the place
-      await placesRef.doc(placeId).delete();
+      // Remove the place locally
+      setState(() {
+        userPlaces.removeAt(index);
+      });
+
+      // Delete the place from Firestore
+      await FirebaseFirestore.instance
+          .collection('myAppCollection')
+          .doc(placeId)
+          .delete();
 
       // Show a SnackBar with Undo option
       ScaffoldMessenger.of(context).showSnackBar(
@@ -32,22 +67,26 @@ class _PlacesPageState extends State<PlacesPage> {
           duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: 'Undo',
-            onPressed: restoreDeletedPlace,
+            onPressed: _restoreDeletedPlace,
           ),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting place: $e')),
-      );
+      print('Error deleting place: $e');
     }
   }
 
-  Future<void> restoreDeletedPlace() async {
-    if (recentlyDeletedPlace != null && recentlyDeletedPlaceId != null) {
+  Future<void> _restoreDeletedPlace() async {
+    if (recentlyDeletedPlace != null) {
       try {
-        // Restore the place
-        await placesRef.doc(recentlyDeletedPlaceId).set(recentlyDeletedPlace!);
+        // Restore the place in Firestore
+        await FirebaseFirestore.instance
+            .collection('myAppCollection')
+            .doc(recentlyDeletedPlaceId)
+            .set(recentlyDeletedPlace!['data']);
+
+        // Reload all user places to ensure consistency
+        await _loadUserPlaces();
 
         // Clear the temporary storage
         recentlyDeletedPlace = null;
@@ -66,62 +105,152 @@ class _PlacesPageState extends State<PlacesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Places"),
+        title: const Text("My Places"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous screen
+          },
+        ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: placesRef.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text("No places available."),
-            );
-          }
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              userPlaces.isEmpty
+                  ? Center(
+                      child: Text(
+                        "No Airbnb added yet",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                      ),
+                    )
+                  : Expanded(
+                      child: ListView.builder(
+                        itemCount: userPlaces.length,
+                        itemBuilder: (context, index) {
+                          final place = userPlaces[index];
+                          final String title = place['title'];
+                          final int price = place['price'];
+                          final String image = place['image'];
+                          final String address = place['address'];
+                          final String category = place['category'];
 
-          final places = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: places.length,
-            itemBuilder: (context, index) {
-              final place = places[index];
-              final String placeId = place.id;
-              final Map<String, dynamic> placeData = place.data() as Map<String, dynamic>;
-
-              return Dismissible(
-                key: Key(placeId),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ),
-                onDismissed: (direction) {
-                  deletePlace(placeId, placeData);
-                },
-                child: ListTile(
-                  leading: placeData.containsKey('image')
-                      ? Image.network(
-                          placeData['image'],
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(Icons.place),
-                  title: Text(placeData['title'] ?? 'Untitled Place'),
-                  subtitle: Text(placeData['category'] ?? 'No Category'),
-                ),
-              );
-            },
-          );
-        },
+                          return Dismissible(
+                            key: Key(place.id),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) => _deletePlace(index, place.id),
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              child:
+                                  const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        PlaceDetailScreen(place: place),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      15), // Match the card's radius
+                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Row(
+                                    children: [
+                                      AdaptiveImage(
+                                        imageSource: image, // Image URL
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      const SizedBox(width: 15),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              title, // Title from Firestore
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              "Category: $category",
+                                              style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              "Price: \$$price",
+                                              style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.location_on,
+                                                    size: 16,
+                                                    color: Colors.redAccent),
+                                                const SizedBox(width: 5),
+                                                Expanded(
+                                                  child: Text(
+                                                    address ??
+                                                        'Unknown location',
+                                                    style: const TextStyle(
+                                                        fontSize: 14),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Icon(
+                                        Icons.drag_handle_rounded,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+            ],
+          ),
+        ),
       ),
     );
   }
