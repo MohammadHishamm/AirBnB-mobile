@@ -30,11 +30,14 @@ class _DisplayPlaceState extends State<DisplayPlace> {
     return StreamBuilder(
       stream: widget.displayCategory.isEmpty
           ? placeCollection
-              .snapshots() // If no category selected, fetch all places
+              .where("isActive",
+                  isEqualTo: true) // Filter places where isActive is true
+              .snapshots()
           : placeCollection
-              .where("category",
+              .where("category", isEqualTo: widget.displayCategory)
+              .where("isActive",
                   isEqualTo:
-                      widget.displayCategory) // Filter by category if selected
+                      true) // Also filter by isActive if category is selected
               .snapshots(),
       builder: (context, streamSnapshot) {
         if (streamSnapshot.hasData) {

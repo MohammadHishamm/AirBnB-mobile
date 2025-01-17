@@ -109,7 +109,10 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Places"),
+        title: const Text("My Places",
+            style: TextStyle(
+              fontSize: 32,
+            )),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

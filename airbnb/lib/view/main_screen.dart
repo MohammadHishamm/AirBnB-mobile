@@ -1,6 +1,7 @@
 import 'package:airbnb/view/explore_screen.dart';
 import 'package:airbnb/view/message.dart';
 import 'package:airbnb/view/profile_page.dart';
+import 'package:airbnb/view/tripscreen.dart';
 import 'package:airbnb/view/wishlists.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +23,8 @@ class _AppMainScreenState extends State<AppMainScreen> {
     page = [
       const ExploreScreen(),
       const Wishlists(),
-      const Scaffold(),
-       MessagesScreen(userId: userID,),
+      const DisplayTripScreen(),
+      MessagesScreen(userId: userID),
       const ProfilePage(),
     ];
     super.initState();
