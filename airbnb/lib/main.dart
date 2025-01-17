@@ -1,5 +1,6 @@
 import 'package:airbnb/provider/favorite_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:airbnb/provider/Theme_provider.dart';
 import 'package:airbnb/view/Login_screen.dart';
@@ -9,7 +10,16 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Load the environment variables
+
+  // Enable all orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: "AIzaSyCGgQ3zjP46P_Bhb1y-WPzQpDvtLY_oPA0",
@@ -18,6 +28,7 @@ void main() async {
       projectId: "airbnb-41b07",
     ),
   );
+
   runApp(const MainApp());
 }
 
@@ -28,9 +39,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-            create: (_) =>
-                ThemeProvider()), // Provides ThemeProvider for managing theme
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FavoriteProvider()),
       ],
       child: Consumer<ThemeProvider>(
@@ -39,7 +48,7 @@ class MainApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: themeProvider.isDarkMode
                 ? ThemeData.dark().copyWith(
-                    scaffoldBackgroundColor: Colors.black, // Dark background
+                    scaffoldBackgroundColor: Colors.black,
                     appBarTheme: const AppBarTheme(
                       backgroundColor: Colors.black,
                       titleTextStyle: TextStyle(color: Colors.white),
@@ -51,7 +60,7 @@ class MainApp extends StatelessWidget {
                     ),
                   )
                 : ThemeData.light().copyWith(
-                    scaffoldBackgroundColor: Colors.white, // Light background
+                    scaffoldBackgroundColor: Colors.white,
                     appBarTheme: const AppBarTheme(
                       backgroundColor: Colors.white,
                       titleTextStyle: TextStyle(color: Colors.black),
@@ -62,14 +71,35 @@ class MainApp extends StatelessWidget {
                       titleMedium: TextStyle(color: Colors.black),
                     ),
                   ),
+            builder: (context, child) {
+              // Only apply modifications in landscape mode
+              return OrientationBuilder(
+                builder: (context, orientation) {
+                  if (orientation == Orientation.landscape) {
+                    return MediaQuery(
+                      // Only modify layout properties in landscape
+                      data: MediaQuery.of(context).copyWith(
+                        // Maintain text size but adjust padding for landscape
+                        padding: MediaQuery.of(context).padding.copyWith(
+                              left: 20.0,
+                              right: 20.0,
+                            ),
+                      ),
+                      child: child!,
+                    );
+                  }
+                  // Return unchanged child in portrait mode
+                  return child!;
+                },
+              );
+            },
             home: StreamBuilder(
-              stream: FirebaseAuth.instance
-                  .authStateChanges(), // Stream to listen for login state changes
+              stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return const AppMainScreen(); // Show the main screen when logged in
+                  return const AppMainScreen();
                 } else {
-                  return const LoginScreen(); // Show the login screen when not logged in
+                  return const LoginScreen();
                 }
               },
             ),
