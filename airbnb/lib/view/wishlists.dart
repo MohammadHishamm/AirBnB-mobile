@@ -26,7 +26,7 @@ class _WishlistsState extends State<Wishlists> {
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     final favoriteItems = provider.favorites;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -40,22 +40,12 @@ class _WishlistsState extends State<Wishlists> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    "Edit",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 35),
                 Text(
                   "Wishlists",
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
+                    fontSize: 32,
                   ),
                 ),
                 const SizedBox(height: 5),
