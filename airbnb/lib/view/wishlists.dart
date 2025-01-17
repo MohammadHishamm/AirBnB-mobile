@@ -26,7 +26,7 @@ class _WishlistsState extends State<Wishlists> {
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     final favoriteItems = provider.favorites;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
