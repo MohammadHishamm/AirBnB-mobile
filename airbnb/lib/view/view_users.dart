@@ -67,14 +67,14 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
               itemBuilder: (context, index) {
                 final user = users[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: ListTile(
                     title: Text(user['email']),
                     subtitle: Text('Type: ${user['userType']}'),
                     trailing: DropdownButton<String>(
                       value: user['userType'],
-                      items: ['customer', 'admin']
+                      items: ['Customer', 'Admin']
                           .map((type) => DropdownMenuItem<String>(
                                 value: type,
                                 child: Text(type),
