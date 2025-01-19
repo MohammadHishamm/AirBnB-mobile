@@ -28,6 +28,7 @@ dependencies:
   flutter_dotenv: ^5.0.2 
   image_picker: ^1.1.2
   path_provider: ^2.1.5
+  fl_chart: ^0.70.2
 
 
 dev_dependencies:

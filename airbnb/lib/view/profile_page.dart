@@ -1,6 +1,7 @@
 import 'package:airbnb/view/Login_screen.dart';
 import 'package:airbnb/view/accessibility_screen.dart';
 import 'package:airbnb/view/add_place_screen.dart';
+import 'package:airbnb/view/stats_page.dart';
 import 'package:airbnb/view/view_place_screen.dart';
 import 'package:airbnb/view/detailed_profile.dart';
 import 'package:airbnb/view/view_users.dart';
@@ -260,6 +261,19 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: profileInfo(
 
                       context, Icons.person, "View users"),
+                ),
+                 GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => StatsPage()),
+                    );
+                  },
+                  
+                  child: profileInfo(
+
+                      context, Icons.person, "View stats"),
                 ),
                 GestureDetector(
                   onTap: () {
