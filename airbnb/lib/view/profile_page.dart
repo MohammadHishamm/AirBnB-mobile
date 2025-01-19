@@ -246,7 +246,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: profileInfo(
                       context, Icons.view_compact, "View your space"),
                 ),
-                 if (userType == 'admin') ...[
+                 if (userType == 'Admin') ...[
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
