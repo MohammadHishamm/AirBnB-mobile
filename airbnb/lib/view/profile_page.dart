@@ -3,6 +3,7 @@ import 'package:airbnb/view/accessibility_screen.dart';
 import 'package:airbnb/view/add_place_screen.dart';
 import 'package:airbnb/view/view_place_screen.dart';
 import 'package:airbnb/view/detailed_profile.dart';
+import 'package:airbnb/view/view_users.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb/Authentication/google_auth.dart';
@@ -247,6 +248,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       context, Icons.view_compact, "View your space"),
                 ),
                  if (userType == 'Admin') ...[
+                  GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ViewUsersPage()),
+                    );
+                  },
+                  
+                  child: profileInfo(
+
+                      context, Icons.person, "View users"),
+                ),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
