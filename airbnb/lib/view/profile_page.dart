@@ -3,6 +3,7 @@ import 'package:airbnb/view/accessibility_screen.dart';
 import 'package:airbnb/view/add_place_screen.dart';
 import 'package:airbnb/view/view_place_screen.dart';
 import 'package:airbnb/view/detailed_profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb/Authentication/google_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -10,8 +11,44 @@ import 'package:flutter/material.dart';
 import 'package:airbnb/view/add_category.dart';
 import 'package:airbnb/view/view_category.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String? userType;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserType();
+  }
+
+  Future<void> _fetchUserType() async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userType = userDoc['userType'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching user type: $e');
+    }
+  }
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +246,7 @@ class ProfilePage extends StatelessWidget {
                   child: profileInfo(
                       context, Icons.view_compact, "View your space"),
                 ),
+                 if (userType == 'admin') ...[
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -217,9 +255,12 @@ class ProfilePage extends StatelessWidget {
                           builder: (context) => AddCategoryPage()),
                     );
                   },
+                  
                   child: profileInfo(
+
                       context, Icons.category_rounded, "Add category"),
                 ),
+                 
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -230,6 +271,7 @@ class ProfilePage extends StatelessWidget {
                   child: profileInfo(
                       context, Icons.view_comfy_alt_rounded, "View categories"),
                 ),
+                 ],
                 profileInfo(
                     context, Icons.home_outlined, "Learn about hosting"),
                 const SizedBox(height: 15),
@@ -307,7 +349,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Padding profileInfo(BuildContext context, IconData icon, String name) {
+ Padding profileInfo(BuildContext context, IconData icon, String name) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
