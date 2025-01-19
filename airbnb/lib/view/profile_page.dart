@@ -47,11 +47,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -248,58 +243,40 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: profileInfo(
                       context, Icons.view_compact, "View your space"),
                 ),
-                 if (userType == 'Admin') ...[
+                if (userType == 'Admin') ...[
                   GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ViewUsersPage()),
-                    );
-                  },
-                  
-                  child: profileInfo(
-
-                      context, Icons.person, "View users"),
-                ),
-                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => StatsPage()),
-                    );
-                  },
-                  
-                  child: profileInfo(
-
-                      context, Icons.person, "View stats"),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AddCategoryPage()),
-                    );
-                  },
-                  
-                  child: profileInfo(
-
-                      context, Icons.category_rounded, "Add category"),
-                ),
-                 
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CategoriesPage()),
-                    );
-                  },
-                  child: profileInfo(
-                      context, Icons.view_comfy_alt_rounded, "View categories"),
-                ),
-                 ],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ViewUsersPage()),
+                      );
+                    },
+                    child: profileInfo(context, Icons.person, "View users"),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddCategoryPage()),
+                      );
+                    },
+                    child: profileInfo(
+                        context, Icons.category_rounded, "Add category"),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CategoriesPage()),
+                      );
+                    },
+                    child: profileInfo(context, Icons.view_comfy_alt_rounded,
+                        "View categories"),
+                  ),
+                ],
                 profileInfo(
                     context, Icons.home_outlined, "Learn about hosting"),
                 const SizedBox(height: 15),
@@ -377,7 +354,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
- Padding profileInfo(BuildContext context, IconData icon, String name) {
+  Padding profileInfo(BuildContext context, IconData icon, String name) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
