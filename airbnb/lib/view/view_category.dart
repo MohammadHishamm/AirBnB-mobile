@@ -14,13 +14,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
   final CollectionReference placesRef =
       FirebaseFirestore.instance.collection("myAppCollection");
 
-  // Temporary storage for the last deleted category
+  
   Map<String, dynamic>? recentlyDeletedCategory;
   String? recentlyDeletedCategoryId;
 
   Future<void> deleteCategory(String categoryId, String categoryTitle) async {
     try {
-      // Fetch and store places associated with the category
+    
       final QuerySnapshot placesSnapshot =
           await placesRef.where('category', isEqualTo: categoryTitle).get();
       List<Map<String, dynamic>> associatedPlaces = [];
@@ -31,7 +31,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         });
       }
 
-      // Store the deleted category and its associated places temporarily
+      
       recentlyDeletedCategory = {
         'id': categoryId,
         'title': categoryTitle,
@@ -43,15 +43,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
       };
       recentlyDeletedCategoryId = categoryId;
 
-      // Delete places associated with the category
+     
       for (var place in associatedPlaces) {
         await placesRef.doc(place['id']).delete();
       }
 
-      // Delete the category
+      
       await categoriesRef.doc(categoryId).delete();
 
-      // Show a SnackBar with Undo option
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Category deleted'),
@@ -72,18 +72,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Future<void> restoreDeletedCategory() async {
     if (recentlyDeletedCategory != null) {
       try {
-        // Restore the category
+        
         await categoriesRef.doc(recentlyDeletedCategoryId).set({
           'title': recentlyDeletedCategory!['title'],
           'image': recentlyDeletedCategory!['image'],
         });
 
-        // Restore associated places
+        
         for (var place in recentlyDeletedCategory!['associatedPlaces']) {
           await placesRef.doc(place['id']).set(place['data']);
         }
 
-        // Clear the temporary storage
+       
         recentlyDeletedCategory = null;
         recentlyDeletedCategoryId = null;
 

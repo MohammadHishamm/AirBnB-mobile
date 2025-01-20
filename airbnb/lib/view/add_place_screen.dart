@@ -21,12 +21,12 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final user = FirebaseAuth.instance.currentUser;
   final ImagePicker _picker = ImagePicker();
 
-  // List to store base64 encoded images
+  
   List<String> _base64Images = [];
-  // List to store image files for preview
+ 
   List<File> _imageFiles = [];
 
-  // Controllers for each form field
+ 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _imageController = TextEditingController();
 

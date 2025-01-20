@@ -18,36 +18,36 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
     String image = _imageController.text.trim();
 
     if (title.isEmpty || image.isEmpty) {
-      // Show a warning if title or image is empty
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Title and Image are required!")),
       );
       return;
     }
 
-    // Check if category already exists
+    
     QuerySnapshot snapshot = await ref.where('title', isEqualTo: title).get();
 
     if (snapshot.docs.isNotEmpty) {
-      // If category already exists, show an alert
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Category with this title already exists!")),
       );
       return;
     }
 
-    // If no duplicates, create a new category
+    
     final String id =
         DateTime.now().toIso8601String() + Random().nextInt(1000).toString();
     final Category newCategory = Category(title: title, image: image);
     await ref.doc(id).set(newCategory.toMap());
 
-    // Show a success message
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Category added successfully!")),
     );
 
-    // Optionally, clear the form
+    
     _titleController.clear();
     _imageController.clear();
   }
