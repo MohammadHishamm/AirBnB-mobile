@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -9,18 +10,17 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
+  String userId = FirebaseAuth.instance.currentUser?.uid ?? "";
   final CollectionReference categoriesRef =
       FirebaseFirestore.instance.collection("AppCategory");
   final CollectionReference placesRef =
       FirebaseFirestore.instance.collection("myAppCollection");
 
-  
   Map<String, dynamic>? recentlyDeletedCategory;
   String? recentlyDeletedCategoryId;
 
   Future<void> deleteCategory(String categoryId, String categoryTitle) async {
     try {
-    
       final QuerySnapshot placesSnapshot =
           await placesRef.where('category', isEqualTo: categoryTitle).get();
       List<Map<String, dynamic>> associatedPlaces = [];
@@ -31,7 +31,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
         });
       }
 
-      
       recentlyDeletedCategory = {
         'id': categoryId,
         'title': categoryTitle,
@@ -43,15 +42,22 @@ class _CategoriesPageState extends State<CategoriesPage> {
       };
       recentlyDeletedCategoryId = categoryId;
 
-     
       for (var place in associatedPlaces) {
         await placesRef.doc(place['id']).delete();
+        final favoritesDocRef = FirebaseFirestore.instance
+            .collection('userFavorites')
+            .doc(userId) // Reference the current user's document
+            .collection('favorites')
+            .doc(place['id']); // Reference the favorite by placeId directly
+        // Check if the document exists
+        final favoritesSnapshot = await favoritesDocRef.get();
+        if (favoritesSnapshot.exists) {
+          await favoritesDocRef.delete();
+        }
       }
 
-      
       await categoriesRef.doc(categoryId).delete();
 
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Category deleted'),
@@ -72,18 +78,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Future<void> restoreDeletedCategory() async {
     if (recentlyDeletedCategory != null) {
       try {
-        
         await categoriesRef.doc(recentlyDeletedCategoryId).set({
           'title': recentlyDeletedCategory!['title'],
           'image': recentlyDeletedCategory!['image'],
         });
 
-        
         for (var place in recentlyDeletedCategory!['associatedPlaces']) {
           await placesRef.doc(place['id']).set(place['data']);
         }
 
-       
         recentlyDeletedCategory = null;
         recentlyDeletedCategoryId = null;
 

@@ -59,6 +59,24 @@ class _DisplayUserPlacesState extends State<DisplayUserPlaces> {
           .collection('myAppCollection')
           .doc(placeId)
           .delete();
+      String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+      if (currentUserId.isEmpty) {
+        print("No user is logged in.");
+        return;
+      }
+      // Access the current user's favorites subcollection to delete the place
+      final favoritesDocRef = FirebaseFirestore.instance
+          .collection('userFavorites')
+          .doc(currentUserId) // Reference the current user's document
+          .collection('favorites')
+          .doc(placeId); // Reference the favorite by placeId directly
+      // Check if the document exists
+      final favoritesSnapshot = await favoritesDocRef.get();
+      if (favoritesSnapshot.exists) {
+        // If it exists, delete it
+        await favoritesDocRef.delete();
+      }
 
       // Show a SnackBar with Undo option
       ScaffoldMessenger.of(context).showSnackBar(

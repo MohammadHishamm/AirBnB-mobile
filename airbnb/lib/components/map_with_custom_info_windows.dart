@@ -155,13 +155,6 @@ class _MapWithCustomInfoWindowsState extends State<MapWithCustomInfoWindows> {
                                     const SizedBox(width: 5),
                                   ],
                                 ),
-                                const Text(
-                                  "3066 m elevation",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
                                 Text(
                                   date,
                                   style: const TextStyle(
